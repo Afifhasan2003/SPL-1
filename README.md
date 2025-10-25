@@ -1,2 +1,2 @@
 # SPL-1
-a project on personal and business investment management (course project)
+a project to manage personal and business investment (course project)
