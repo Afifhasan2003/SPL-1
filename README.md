@@ -28,3 +28,7 @@ A C++ application for managing investment portfolios and analyzing stock perform
 - **Phase 3** (Weeks 15-18): Predictive models and recommendations
 
 
+
+## How to Run
+g++ main.cpp src/Stock.cpp src/Portfolio.cpp -o quantlab
+./quantlab
