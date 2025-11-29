@@ -14,7 +14,8 @@ void displayMainMenu() {
     cout << "1. Manage Portfolios" << endl;
     cout << "2. Load Stock Data" << endl;
     cout << "3. View Stock Info" << endl;
-    cout << "4. Exit" << endl;
+    cout << "4. View Indicators" << endl;
+    cout << "5. Exit" << endl;
     cout << "======================================" << endl;
     cout << "Enter choice: ";
 }
@@ -57,6 +58,7 @@ int main() {
         int choice;
         cin >> choice;
         
+    
         if (choice == 1) {
             // ===== PORTFOLIO MANAGEMENT =====
             while (true) {
@@ -188,8 +190,9 @@ int main() {
                 }
             }
             
-        } else if (choice == 2) {
-            // ===== LOAD STOCK DATA =====
+        }
+        else if (choice == 2) {
+           // ===== LOAD STOCK DATA =====
             string symbol, name, filename;
             
             cout << "\nEnter stock symbol: ";
@@ -240,6 +243,185 @@ int main() {
             }
             
         } else if (choice == 4) {
+            // ===== VIEW INDICATORS =====
+            if (stocks.empty()) {
+                cout << "\nNo stocks loaded yet." << endl;
+            } else {
+                cout << "\n=== Loaded Stocks ===" << endl;
+                for (const auto& pair : stocks) {
+                    cout << "- " << pair.first << endl;
+                }
+                
+                string symbol;
+                cout << "Enter symbol: ";
+                cin >> symbol;
+                
+                if (stocks.find(symbol) != stocks.end()) {
+                    Stock* stock = stocks[symbol];      
+                    int dataSize = stock->getDataSize();
+                    
+                    cout << "\n=== Technical Indicators for " << symbol << " ===" << endl;
+                    
+                    // Submenu for indicators
+                    cout << "\n1. View Moving Averages (SMA)" << endl;
+                    cout << "2. View RSI" << endl;
+                    cout << "3. View MACD" << endl;
+                    cout << "4. View Bollinger Bands" << endl;
+                    cout << "5. View Momentum" << endl;
+                    cout << "6. View All Indicators Summary" << endl;
+                    cout << "Enter choice: ";
+                    
+                    int indicatorChoice;
+                    cin >> indicatorChoice;
+                    
+                    int numDays;
+                    cout << "How many recent days to display? ";
+                    cin >> numDays;
+                    
+                    int start = max(0, dataSize - numDays);
+                    
+                    if (indicatorChoice == 1) {
+                        // view SMA
+                        cout << "\n=== Moving Averages ===" << endl;
+                        cout << "Day\tSMA-20\t\tSMA-50" << endl;
+                        cout << "------------------------------------" << endl;
+                        for (int i = start; i < dataSize; i++) {
+                            cout << i << "\t";
+                            double sma20 = stock->getSMA20(i);
+                            double sma50 = stock->getSMA50(i);
+                            
+                            if (sma20 > 0) cout << "$" << sma20;
+                            else cout << "N/A";
+                            cout << "\t\t";
+                            
+                            if (sma50 > 0) cout << "$" << sma50;
+                            else cout << "N/A";
+                            cout << endl;
+                        }
+                        
+                    } 
+                    else if (indicatorChoice == 2) {
+                        // RSI
+                        cout << "\n=== RSI (Relative Strength Index) ===" << endl;
+                        cout << "Day\tRSI\t\tSignal" << endl;
+                        cout << "------------------------------------" << endl;
+                        for (int i = start; i < dataSize; i++) {
+                            cout << i << "\t";
+                            double rsi = stock->getRSI(i);
+                            
+                            if (rsi > 0) {
+                                cout << rsi << "\t\t";
+                                if (rsi > 70) cout << "Overbought";
+                                else if (rsi < 30) cout << "Oversold";
+                                else cout << "Neutral";
+                            } else {
+                                cout << "N/A\t\tN/A";
+                            }
+                            cout << endl;
+                        }
+                        
+                    } 
+                    else if (indicatorChoice == 3) {
+                        // MACD
+                        cout << "\n=== MACD ===" << endl;
+                        cout << "Day\tMACD\t\tSignal\t\tHistogram\tTrend" << endl;
+                        cout << "------------------------------------------------------------" << endl;
+                        for (int i = start; i < dataSize; i++) {
+                            cout << i << "\t";
+                            double macd = stock->getMACD(i);
+                            double signal = stock->getMACDSignal(i);
+                            double hist = stock->getMACDHistogram(i);
+                            
+                            if (macd != 0) {
+                                cout << macd << "\t" << signal << "\t" << hist << "\t\t";
+                                if (hist > 0) cout << "Bullish";
+                                else if (hist < 0) cout << "Bearish";
+                            } else {
+                                cout << "N/A\t\tN/A\t\tN/A\t\tN/A";
+                            }
+                            cout << endl;
+                        }
+                        
+                    } 
+                    else if (indicatorChoice == 4) {
+                        // Bollinger Bands
+                        cout << "\n=== Bollinger Bands ===" << endl;
+                        cout << "Day\tUpper\t\tMiddle\t\tLower\t\tPosition" << endl;
+                        cout << "------------------------------------------------------------" << endl;
+                        for (int i = start; i < dataSize; i++) {
+                            cout << i << "\t";
+                            double upper = stock->getBollingerUpper(i);
+                            double middle = stock->getBollingerMiddle(i);
+                            double lower = stock->getBollingerLower(i);
+                            
+                            if (upper > 0) {
+                                cout << "$" << upper << "\t$" << middle << "\t$" << lower << "\t";
+                                // Could add price position relative to bands
+                                cout << "---";
+                            } else {
+                                cout << "N/A\t\tN/A\t\tN/A\t\tN/A";
+                            }
+                            cout << endl;
+                        }
+                        
+                    } else if (indicatorChoice == 5) {
+                        // Momentum
+                        cout << "\n=== Momentum (10-day) ===" << endl;
+                        cout << "Day\tMomentum %\tTrend" << endl;
+                        cout << "------------------------------------" << endl;
+                        for (int i = start; i < dataSize; i++) {
+                            cout << i << "\t";
+                            double mom = stock->getMomentum(i);
+                            
+                            if (mom != 0) {
+                                cout << mom << "%\t\t";
+                                if (mom > 5) cout << "Strong Up";
+                                else if (mom > 0) cout << "Up";
+                                else if (mom > -5) cout << "Down";
+                                else cout << "Strong Down";
+                            } else {
+                                cout << "N/A\t\tN/A";
+                            }
+                            cout << endl;
+                        }
+                        
+                    } else if (indicatorChoice == 6) {
+                        // All indicators summary
+                        cout << "\n=== All Indicators Summary ===" << endl;
+                        cout << "Day\tSMA20\tRSI\tMACD\tMomentum" << endl;
+                        cout << "----------------------------------------------------" << endl;
+                        for (int i = start; i < dataSize; i++) {
+                            cout << i << "\t";
+                            
+                            double sma20 = stock->getSMA20(i);
+                            if (sma20 > 0) cout << "$" << (int)sma20;
+                            else cout << "N/A";
+                            cout << "\t";
+                            
+                            double rsi = stock->getRSI(i);
+                            if (rsi > 0) cout << (int)rsi;
+                            else cout << "N/A";
+                            cout << "\t";
+                            
+                            double macd = stock->getMACD(i);
+                            if (macd != 0) cout << (int)macd;
+                            else cout << "N/A";
+                            cout << "\t";
+                            
+                            double mom = stock->getMomentum(i);
+                            if (mom != 0) cout << (int)mom << "%";
+                            else cout << "N/A";
+                            
+                            cout << endl;
+                        }
+                    }
+                    
+                } else {
+                    cout << "Stock not found." << endl;
+                }
+            }
+            
+        } else if (choice == 5) {
             // ===== EXIT =====
             cout << "\nThank you for using QuantLab!" << endl;
             
