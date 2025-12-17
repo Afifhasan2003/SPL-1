@@ -1,5 +1,4 @@
-// Stock.cpp
-#include "../include/Stock.h"
+#include "../include/Stock.h" //.. for going back to the parent directory
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -7,483 +6,434 @@
 
 using namespace std;
 
-// Helper function to trim spaces
-string trim(const string& str) {
-    size_t start = str.find_first_not_of(" \t\r\n");
-    size_t end = str.find_last_not_of(" \t\r\n");
-    if (start == string::npos) return "";
+string trimf(string &str)
+{
+    int start = str.find_first_not_of(" \t\r\n");
+    int end = str.find_last_not_of(" \t\r\n");
+    if (start == string::npos)
+        return "";
     return str.substr(start, end - start + 1);
 }
 
-// Constructor
-Stock::Stock(string sym, string stockName) {
+Stock::Stock(string sym, string stcockName)
+{
     symbol = sym;
-    name = stockName;
+    name = name;
 }
 
-// Load data from CSV file
-bool Stock::loadFromCSV(string filename) {
-    ifstream file(filename);
-    
-    if (!file.is_open()) {
-        cout << "Error: Could not open " << filename << endl;
+bool Stock::loadFromCSV(string filename)
+{
+    ifstream file(filename); // creates an ifstream(input file stream) object named file and opens the csv file
+    if (!file.is_open())
+    { // check if file opened successfully
+        cout << "could not open file: " << filename << endl;
         return false;
     }
-    
-    string line;
+
+    string oneline;
     int lineNumber = 0;
-    
-    while (getline(file, line)) {
+
+    while (getline(file, oneline))
+    {
         lineNumber++;
-        
-        // Skip header
-        if (lineNumber == 1) continue;
-        
-        // Parse line
-        stringstream ss(line);
+
+        if (lineNumber == 1)
+            continue; // first line is headings
+
+        stringstream ss(oneline); // convert the line into stringstream, sparsing works on this
         string date, open, high, low, close, volume;
-        
+
         getline(ss, date, ',');
         getline(ss, open, ',');
         getline(ss, high, ',');
         getline(ss, low, ',');
         getline(ss, close, ',');
         getline(ss, volume, ',');
-        
-        // Trim and store
-        dates.push_back(trim(date));
-        openPrices.push_back(stod(trim(open)));
-        highPrices.push_back(stod(trim(high)));
-        lowPrices.push_back(stod(trim(low)));
-        closePrices.push_back(stod(trim(close)));
-        volumes.push_back(stoll(trim(volume)));
+
+        // trim extra
+        dates.push_back(trimf(date));
+        openPrices.push_back(stod(trimf(open))); // stod: string to double
+        highPrices.push_back(stod(trimf(high)));
+        lowPrices.push_back(stod(trimf(low)));
+        closePrices.push_back(stod(trimf(close)));
+        volumes.push_back(stoll(trimf(volume)));
     }
-    
+
     file.close();
-    
-    // Calculate indicators after loading data
+
+    // now calculating indicators and storing them in the vectors (defined in the header file)
     calculateAllIndicators();
-    
     return true;
 }
 
-// Getters
-string Stock::getSymbol() const {
+// some getters
+string Stock::getSymbol()
+{
     return symbol;
 }
-
-string Stock::getName() const {
+string Stock::getName()
+{
     return name;
 }
-
-int Stock::getDataSize() const {        
-    return dates.size();
+int Stock::getDataSize(){
+    dates.size();
 }
 
-// Display summary
-void Stock::displaySummary() const {
-    cout << "\n=== " << symbol << " - " << name << " ===" << endl;
+void Stock::displaySummary()
+{
+    cout << "\n===" << symbol << " - " << name << "===" << endl;
     cout << "Total days of data: " << dates.size() << endl;
-    
-    if (dates.size() > 0) {
-        cout << "Date range: " << dates[0] << " to " << dates[dates.size()-1] << endl;
-        cout << "Latest close: $" << closePrices[closePrices.size()-1] << endl;
+    if (dates.size() > 0)
+    {
+        cout << "date range: " << dates[0] << " to " << dates[dates.size() - 1] << endl;
+        cout << "latest close: $" << closePrices[dates.size() - 1] << endl;
     }
 }
 
-// Display recent data
-void Stock::displayRecentData(int numDays) const {
-    if (dates.size() == 0) {
-        cout << "No data available." << endl;
+void Stock::displayRecentData(int day)
+{
+    if (dates.size() == 0)
+    {
+        cout << "no data available" << endl;
         return;
     }
-    
-    int start = max(0, (int)dates.size() - numDays);
-    
-    cout << "\nRecent " << numDays << " days:" << endl;
-    cout << "Date\t\tOpen\tHigh\tLow\tClose\tVolume" << endl;
-    cout << "--------------------------------------------------------" << endl;
-    
-    for (int i = start; i < dates.size(); i++) {
-        cout << dates[i] << "\t"
-             << openPrices[i] << "\t"
-             << highPrices[i] << "\t"
-             << lowPrices[i] << "\t"
-             << closePrices[i] << "\t"
+
+    int start = dates.size() - day;
+
+    cout << "recent data (last " << day << "days): " << endl;
+    cout << "date \t\t Open \t\t High \t\t Low \t\t Close \t\t Volume" << endl;
+    cout << "---------------------------------------------------------------------------------------------------" << endl;
+    for (int i = start; i < dates.size(); i++)
+    {
+        cout << dates[i] << "\t\t"
+             << openPrices[i] << "\t\t"
+             << highPrices[i] << "\t\t"
+             << lowPrices[i] << "\t\t"
+             << closePrices[i] << "\t\t"
              << volumes[i] << endl;
     }
 }
 
-// Calculate Simple Moving Average
-void Stock::calculateSMA(int period) {
-    vector<double>* targetVector;
-    
-    // Decide which vector to fill
-    if (period == 20) {
-        targetVector = &sma20;
-    } else if (period == 50) {
-        targetVector = &sma50;
-    } else {
-        cout << "Error: SMA period " << period << " not supported" << endl;
+void Stock::calculateSMA(int period){ // simple moving average
+    vector<double> *vec;
+
+    // decide which vector to work on
+    if (period == 20)
+        vec = &sma20;
+    else if (period == 50)
+        vec = &sma50;
+    else
+    {
+        cout << "period " << period << " not supported";
         return;
     }
-    
-    targetVector->clear();
-    
-    // Calculate SMA for each day
-    for (int i = 0; i < closePrices.size(); i++) {
-        if (i < period - 1) {
-            // Not enough data yet, store 0 or -1 as placeholder
-            targetVector->push_back(0.0);
-        } else {
-            // Calculate average of last 'period' days
-            double sum = 0.0;
-            for (int j = i - period + 1; j <= i; j++) {
-                sum += closePrices[j];
-            }
-            double sma = sum / period;
-            targetVector->push_back(sma);
-        }
+
+    vec->clear(); // clear previous data if stored
+
+    // calculate sma for each day
+    double sum = 0.0;
+    for (int i = 0; i < period - 1; i++)
+    {
+        vec->push_back(0.0);
+        sum += closePrices[i];
+    }
+
+    for (int i = period - 1; i < closePrices.size(); i++)
+    {
+        sum += closePrices[i];
+        double sma = sum / period;
+        vec->push_back(sma);
+        sum -= closePrices[i - period];
     }
 }
 
-// Calculate all indicators
-void Stock::calculateAllIndicators() {
-    cout << "Calculating indicators for " << symbol << "..." << endl;
-    
+void Stock::calculateAllIndicators(){
+    //this is called d
+    cout << "Calculating indicators of " << name << " company ...." << endl;
     calculateSMA(20);
     calculateSMA(50);
     calculateEMA(12);
     calculateEMA(26);
     calculateMACD();
-    calculateBollingerBands(20, 2.0);
+    calculateBoillingerBands(20, 2.0);
     calculateMomentum(10);
     calculateRSI(14);
-    
-    cout << "✓ Indicators calculated!" << endl;
+
+    cout << " DONE!!! all indicators calculated" << endl;
 }
 
-// Get SMA values
-double Stock::getSMA20(int index) const {
-    if (index >= 0 && index < sma20.size()) {
-        return sma20[index];
-    }
-    return 0.0;
-}
-
-// Calculate Exponential Moving Average
-void Stock::calculateEMA(int period) {
-    vector<double>* targetVector;
-    
-    if (period == 12) {
-        targetVector = &ema12;
-    } else if (period == 26) {
-        targetVector = &ema26;
-    } else {
+void Stock::calculateEMA(int period){ // exponential moving average
+    vector<double> *vec;
+    if (period == 12)
+        vec = &ema12;
+    else if (period == 26)
+        vec = &ema26;
+    else
+    {
+        cout << "invalid period of ema";
         return;
     }
-    
-    targetVector->clear();
-    
+
+    vec->clear();
+
     double multiplier = 2.0 / (period + 1);
-    
-    for (int i = 0; i < closePrices.size(); i++) {
-        if (i < period - 1) {
-            targetVector->push_back(0.0);
-        } else if (i == period - 1) {
-            // First EMA = SMA
-            double sum = 0.0;
-            for (int j = 0; j < period; j++) {
-                sum += closePrices[i - period + 1 + j];
-            }
-            targetVector->push_back(sum / period);
-        } else {
-            // EMA = (Close * multiplier) + (EMA_prev * (1 - multiplier))
-            double ema = (closePrices[i] * multiplier) + ((*targetVector)[i-1] * (1 - multiplier));
-            targetVector->push_back(ema);
-        }
+
+    double sum = 0.0;
+    for (int i = 0; i < period - 1; i++)
+    {
+        // vec->push_back(0.0);
+        vec->push_back(nan("")); // it says the value is not a number
+        sum += closePrices[i];
+    }
+    sum += closePrices[period - 1];
+    vec->push_back(sum / period);
+
+    for (int i = period; i < closePrices.size(); i++)
+    {
+        double ema = (closePrices[i] * multiplier) + ((*vec)[i - 1] * (1 - multiplier));
+        vec->push_back(ema);
     }
 }
 
-// Calculate MACD
-void Stock::calculateMACD() {
+void Stock::calculateMACD(){
     macd.clear();
     macdSignal.clear();
     macdHistogram.clear();
-    
-    // Calculate MACD Line = EMA12 - EMA26
-    for (int i = 0; i < closePrices.size(); i++) {
-        if (i < 25) {  // Need 26 days for EMA26
-            macd.push_back(0.0);
-        } else {
-            double macdValue = ema12[i] - ema26[i];
-            macd.push_back(macdValue);
+
+    // calculate macd line = ema12-ema26
+    for (int i = 0; i < closePrices.size(); i++)
+    {
+        if (i < 25)
+        {
+            macd.push_back(nan(""));
+        }
+        else
+        {
+            double val = ema12[i] - ema26[i];
+            macd.push_back(val);
         }
     }
-    
-    // Calculate Signal Line = 9-day EMA of MACD
+
+    // calculate signal line = 9-day ema of macd
     double multiplier = 2.0 / (9 + 1);
-    
-    for (int i = 0; i < macd.size(); i++) {
-        if (i < 33) {  // Need 26 + 9 - 1 = 34 days
-            macdSignal.push_back(0.0);
-        } else if (i == 33) {
-            // First signal = SMA of MACD
+
+    for (int i = 0; i < macd.size(); i++)
+    {
+        if (i < 33)
+        {
+            macdSignal.push_back(nan("")); // need 26+9-1 = 34 days
+        }
+        else if (i == 33)
+        { // first signal = sma of macd
             double sum = 0.0;
-            for (int j = 0; j < 9; j++) {
+            for (int j = 0; j < 9; j++)
+            {
                 sum += macd[i - 8 + j];
             }
             macdSignal.push_back(sum / 9);
-        } else {
-            // Signal EMA
-            double signal = (macd[i] * multiplier) + (macdSignal[i-1] * (1 - multiplier));
+        }
+        else
+        {
+            double signal = (macd[i] * multiplier) + (macdSignal[i - 1] * (1 - multiplier));
             macdSignal.push_back(signal);
         }
     }
-    
-    // Calculate Histogram = MACD - Signal
-    for (int i = 0; i < macd.size(); i++) {
-        if (macdSignal[i] == 0.0) {
-            macdHistogram.push_back(0.0);
-        } else {
+
+    // calculate histogram = macd-signal  (when one line crosses another, it's a buy/sell signal)
+    for (int i = 0; i < macd.size(); i++)
+    {
+        if (isnan(macdSignal[i])) // to avoid nan subtraction
+        {
+            macdHistogram.push_back(nan(""));
+        }
+        else
+        {
             macdHistogram.push_back(macd[i] - macdSignal[i]);
         }
     }
 }
 
-double Stock::getMACD(int index) const {
-    if (index >= 0 && index < macd.size()) {
+void Stock::calculateBoillingerBands(int period, double n){
+    bollingerLower.clear();
+    bollingerMiddle.clear();
+    bollingerUpper.clear();
+
+    for (int i = 0; i < closePrices.size(); i++)
+    {
+        if (i < period - 1)
+        {
+            bollingerLower.push_back(0.0);
+            bollingerMiddle.push_back(0.0);
+            bollingerUpper.push_back(0.0);
+        }
+        else
+        {
+            double sum = 0;
+            for (int j = i - period + 1; j <= i; j++)
+                sum += closePrices[j];
+            double sma = sum / period; // sma is the middleband
+
+            double var = 0;
+            for (int j = i - period + 1; j <= i; j++)
+            {
+                double diff = closePrices[j] - sma;
+                var += diff * diff;
+            }
+
+            double stdDev = sqrt(var / period);
+
+            bollingerLower.push_back(sma - n * stdDev);
+            bollingerMiddle.push_back(sma);
+            bollingerUpper.push_back(sma + n * stdDev);
+        }
+    }
+}
+
+void Stock::calculateMomentum(int period){
+    momentum.clear();
+
+    for (int i = 0; i < period; i++)
+    {
+        momentum.push_back(0.0);
+    }
+    for (int i = period; i < closePrices.size(); i++)
+    {
+        double currPrice = closePrices[i];
+        double oldPrice = closePrices[i - period];
+        double moment = ((currPrice - oldPrice) / oldPrice) * 100;
+        momentum.push_back(moment);
+    }
+}
+
+void Stock::calculateRSI(int period)
+{
+    rsi.clear();
+    if (closePrices.size() < period + 1)
+    {
+        cout << "not enough data to calculate RSI";
+        return;
+    }
+
+    // rs=gains/losses of period time
+    vector<double> gains;
+    vector<double> losses;
+    for (int i = 1; i < closePrices.size(); i++)
+    {
+        double change = closePrices[i] - closePrices[i - 1];
+        if (change > 0)
+        {
+            gains.push_back(change);
+            losses.push_back(0.0);
+        }
+        else
+        {
+            gains.push_back(0.0);
+            losses.push_back(-change);
+        }
+    }
+
+    // now RSI = 100 - 100/(1+rs)
+
+    double gainSum = 0.0, avgGain, avgLoss,rs,rsiVal;
+    double lossSum = 0.0;
+   
+    for (int i = 0; i < period-1; i++)  //first 14days
+    {
+        gainSum += gains[i];
+        lossSum += losses[i];
+
+        rsi.push_back(0.0);
+    }
+
+    for(int i = period -1 ;i<gains.size(); i++){
+        gainSum += gains[i];
+        lossSum += losses[i];
+
+        avgGain = gainSum/period;
+        avgLoss = lossSum/period;
+        if(avgLoss == 0.0)
+            rsi.push_back(100);
+        else{
+            rs=avgGain/avgLoss;
+            rsiVal=100 - (100/(1+rs));
+            rsi.push_back(rsiVal);
+        }
+
+        gainSum -= gains[i-period];
+        lossSum -=losses[i-period];
+    }
+
+}
+
+
+
+
+double Stock::getSMA20(int index){
+    if (index >= 0 && index < sma20.size())
+    {
+        return sma20[index];
+    }
+    return 0.0;
+}
+
+double Stock::getMACD(int index){
+    if (index >= 0 && index < macd.size())
+    {
         return macd[index];
     }
-    return 0.0;
 }
-
-double Stock::getMACDSignal(int index) const {
-    if (index >= 0 && index < macdSignal.size()) {
+double Stock::getMACDSignal(int index){
+    if (index >= 0 && index < macdSignal.size())
+    {
         return macdSignal[index];
     }
-    return 0.0;
 }
-
-double Stock::getMACDHistogram(int index) const {
-    if (index >= 0 && index < macdHistogram.size()) {
+double Stock::getMACDHistogram(int index){
+    if (index >= 0 && index < macdHistogram.size())
+    {
         return macdHistogram[index];
     }
+}
+
+double Stock::getBollingerLower(int index)
+{
+    if (index >= 0 && index < bollingerLower.size())
+    {
+        bollingerLower[index];
+    }
     return 0.0;
 }
-
-// Calculate Bollinger Bands
-void Stock::calculateBollingerBands(int period, double numStdDev) {
-    bollingerUpper.clear();
-    bollingerMiddle.clear();
-    bollingerLower.clear();
-    
-    for (int i = 0; i < closePrices.size(); i++) {
-        if (i < period - 1) {
-            bollingerUpper.push_back(0.0);
-            bollingerMiddle.push_back(0.0);
-            bollingerLower.push_back(0.0);
-        } else {
-            // Calculate SMA (middle band)
-            double sum = 0.0;
-            for (int j = i - period + 1; j <= i; j++) {
-                sum += closePrices[j];
-            }
-            double sma = sum / period;
-            
-            // Calculate standard deviation
-            double variance = 0.0;
-            for (int j = i - period + 1; j <= i; j++) {
-                double diff = closePrices[j] - sma;
-                variance += diff * diff;
-            }
-            double stdDev = sqrt(variance / period);
-            
-            // Calculate bands
-            bollingerMiddle.push_back(sma);         
-            bollingerUpper.push_back(sma + (numStdDev * stdDev));  
-            bollingerLower.push_back(sma - (numStdDev * stdDev));
-        }
+double Stock::getBollingerMiddle(int index){
+    if (index >= 0 && index < bollingerMiddle.size())
+    {
+        bollingerMiddle[index];
     }
+    return 0.0;
 }
-
-double Stock::getBollingerUpper(int index) const {
-    if (index >= 0 && index < bollingerUpper.size()) {
-        return bollingerUpper[index];
+double Stock::getBollingerUpper(int index)
+{
+    if (index >= 0 && index < bollingerUpper.size())
+    {
+        bollingerUpper[index];
     }
     return 0.0;
 }
 
-double Stock::getBollingerMiddle(int index) const {
-    if (index >= 0 && index < bollingerMiddle.size()) {
-        return bollingerMiddle[index];
-    }
-    return 0.0;
-}
-
-double Stock::getBollingerLower(int index) const {
-    if (index >= 0 && index < bollingerLower.size()) {
-        return bollingerLower[index];
-    }
-    return 0.0;
-}
-
-// Calculate Momentum
-void Stock::calculateMomentum(int period) {
-    momentum.clear();
-    
-    for (int i = 0; i < closePrices.size(); i++) {
-        if (i < period) {
-            momentum.push_back(0.0);
-        } else {
-            double currentPrice = closePrices[i];
-            double oldPrice = closePrices[i - period];
-            double mom = ((currentPrice - oldPrice) / oldPrice) * 100.0;
-            momentum.push_back(mom);
-        }
-    }
-}
-
-double Stock::getMomentum(int index) const {
-    if (index >= 0 && index < momentum.size()) {
+double Stock::getMomentum(int index)
+{
+    if (index >= 0 && index < momentum.size())
+    {
         return momentum[index];
     }
     return 0.0;
 }
 
-double Stock::getSMA50(int index) const {
-    if (index >= 0 && index < sma50.size()) {
-        return sma50[index];
-    }
-    return 0.0;
-}
-
-// Calculate RSI (Relative Strength Index)
-void Stock::calculateRSI(int period) {
-    rsi.clear();
-    
-    if (closePrices.size() < period + 1) {
-        cout << "Not enough data for RSI calculation" << endl;
-        return;
-    }
-    
-    // First, calculate price changes
-    vector<double> gains;
-    vector<double> losses;
-    
-    for (int i = 1; i < closePrices.size(); i++) {
-        double change = closePrices[i] - closePrices[i-1];
-        
-        if (change > 0) {
-            gains.push_back(change);
-            losses.push_back(0.0);
-        } else {
-            gains.push_back(0.0);
-            losses.push_back(-change);  // Make positive
-        }
-    }
-    
-    // Calculate RSI for each day
-    for (int i = 0; i < gains.size(); i++) {
-        if (i < period - 1) {
-            // Not enough data yet
-            rsi.push_back(0.0);
-        } else if (i == period - 1) {
-            // First RSI - use simple average
-            double avgGain = 0.0;
-            double avgLoss = 0.0;
-            
-            for (int j = 0; j < period; j++) {
-                avgGain += gains[j];
-                avgLoss += losses[j];
-            }
-            
-            avgGain /= period;
-            avgLoss /= period;
-            
-            if (avgLoss == 0.0) {
-                rsi.push_back(100.0);
-            } else {
-                double rs = avgGain / avgLoss;
-                double rsiValue = 100.0 - (100.0 / (1.0 + rs));
-                rsi.push_back(rsiValue);
-            }
-        } else {
-            // Subsequent RSI - use smoothed average
-            double prevAvgGain = 0.0;
-            double prevAvgLoss = 0.0;
-            
-            // Get previous averages (simplified - using window average)
-            for (int j = i - period + 1; j <= i; j++) {
-                prevAvgGain += gains[j];
-                prevAvgLoss += losses[j];
-            }
-            
-            prevAvgGain /= period;
-            prevAvgLoss /= period;
-            
-            if (prevAvgLoss == 0.0) {
-                rsi.push_back(100.0);
-            } else {
-                double rs = prevAvgGain / prevAvgLoss;
-                double rsiValue = 100.0 - (100.0 / (1.0 + rs));
-                rsi.push_back(rsiValue);
-            }
-        }
-    }
-    
-    // Add one more 0 at the beginning to align with closePrices
-    rsi.insert(rsi.begin(), 0.0);
-}
-
-double Stock::getRSI(int index) const {
-    if (index >= 0 && index < rsi.size()) {
+double Stock::getRSI(int index){
+    if (index >= 0 && index < rsi.size())
+    {
         return rsi[index];
     }
     return 0.0;
 }
 
-// Debug RSI calculation for specific index
-void Stock::debugRSI(int index) const {
-    if (index < 15) {
-        cout << "Need at least 15 days of data for RSI" << endl;
-        return;
-    }
-    
-    cout << "\n=== RSI Debug for Day " << index << " ===" << endl;
-    cout << "Last 14 days of prices and changes:" << endl;
-    cout << "Day\tClose\tChange\tGain\tLoss" << endl;
-    
-    double totalGain = 0.0;
-    double totalLoss = 0.0;
-    
-    for (int i = index - 14; i <= index; i++) {
-        double change = (i > 0) ? closePrices[i] - closePrices[i-1] : 0;
-        double gain = (change > 0) ? change : 0;
-        double loss = (change < 0) ? -change : 0;
-        
-        if (i > index - 14) {  // Skip first day (no change)
-            totalGain += gain;
-            totalLoss += loss;
-        }
-        
-        cout << i << "\t" << closePrices[i] << "\t";
-        if (i > 0) {
-            cout << change << "\t" << gain << "\t" << loss;
-        } else {
-            cout << "N/A\tN/A\tN/A";
-        }
-        cout << endl;
-    }
-    
-    double avgGain = totalGain / 14;
-    double avgLoss = totalLoss / 14;
-    double rs = (avgLoss > 0) ? avgGain / avgLoss : 0;
-    double calculatedRSI = 100.0 - (100.0 / (1.0 + rs));
-    
-    cout << "\nAverage Gain: " << avgGain << endl;
-    cout << "Average Loss: " << avgLoss << endl;
-    cout << "RS: " << rs << endl;
-    cout << "Calculated RSI: " << calculatedRSI << endl;
-    cout << "Stored RSI: " << getRSI(index) << endl;
-}
+
