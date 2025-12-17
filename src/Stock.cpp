@@ -76,7 +76,7 @@ string Stock::getName()
     return name;
 }
 int Stock::getDataSize(){
-    dates.size();
+    return dates.size();
 }
 
 void Stock::displaySummary()
@@ -376,37 +376,48 @@ double Stock::getSMA20(int index){
     return 0.0;
 }
 
+double Stock::getSMA50(int index){
+    if (index >= 0 && index < sma50.size())
+    {
+        return sma50[index];
+    }
+    return 0.0;
+}
+
 double Stock::getMACD(int index){
     if (index >= 0 && index < macd.size())
     {
         return macd[index];
     }
+    return 0.0;
 }
 double Stock::getMACDSignal(int index){
     if (index >= 0 && index < macdSignal.size())
     {
         return macdSignal[index];
     }
+    return 0.0;
 }
 double Stock::getMACDHistogram(int index){
     if (index >= 0 && index < macdHistogram.size())
     {
         return macdHistogram[index];
     }
+    return 0.0;
 }
 
 double Stock::getBollingerLower(int index)
 {
     if (index >= 0 && index < bollingerLower.size())
     {
-        bollingerLower[index];
+        return bollingerLower[index];
     }
     return 0.0;
 }
 double Stock::getBollingerMiddle(int index){
     if (index >= 0 && index < bollingerMiddle.size())
     {
-        bollingerMiddle[index];
+        return bollingerMiddle[index];
     }
     return 0.0;
 }
@@ -414,7 +425,7 @@ double Stock::getBollingerUpper(int index)
 {
     if (index >= 0 && index < bollingerUpper.size())
     {
-        bollingerUpper[index];
+        return bollingerUpper[index];
     }
     return 0.0;
 }

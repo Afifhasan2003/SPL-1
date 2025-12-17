@@ -32,3 +32,4 @@ A C++ application for managing investment portfolios and analyzing stock perform
 ## How to Run
 g++ main.cpp src/Stock.cpp src/Portfolio.cpp -o quantlab
 ./quantlab
+

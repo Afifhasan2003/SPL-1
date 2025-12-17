@@ -5,7 +5,7 @@
 #include<string>
 #include<map>
 #include<vector>
-#include<Stock.h>
+#include"Stock.h"
 
 
 using namespace std;
