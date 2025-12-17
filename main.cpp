@@ -3,6 +3,7 @@
 #include <map>
 #include "./include/Stock.h"
 #include "./include/Portfolio.h"
+#include "include/Analytics.h"
 
 using namespace std;
 
@@ -15,7 +16,8 @@ void displayMainMenu()
     cout << "2. Load Stock Data" << endl;
     cout << "3. View Stock Info" << endl;
     cout << "4. View Indicators" << endl;
-    cout << "5. Exit" << endl;
+    cout << "5. View Analytics" << endl;
+    cout << "6. Exit"<<endl;
     cout << "======================================" << endl;
     cout << "Enter choice: ";
 }
@@ -469,7 +471,28 @@ int main()
                 
             }
         }
-        else if (choice == 5)   //Exit
+        else if (choice ==5){   //view Analytics
+            if(stocks.empty()){
+                cout<<"\nNo Stocks loaded yet."<<endl;
+            }
+            else{
+                cout<<"\n===Loaded Stocks==="<<endl;
+                for(auto& pair: stocks)
+                    cout<<"-"<<pair.first<<endl;
+
+                string sym;
+                cout<<"Enter symbol: ";
+                cin>>sym;
+
+                if(stocks.find(sym) != stocks.end())
+                    Analytics::displayAnalyticsReport(stocks[sym]);
+                else    
+                    cout<<"Stock not found"<<endl;
+
+            }
+
+        }
+        else if (choice == 6)   //Exit
         {
             cout << "\nThank you for using Finance Bazar!" << endl;
             break;

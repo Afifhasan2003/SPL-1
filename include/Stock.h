@@ -44,6 +44,8 @@ public:
     string getSymbol();
     string getName();
     int getDataSize();
+    double getClosePrice(int index);
+    vector<double>getAllClosePrices();
 
     //Display functions
     void displaySummary();

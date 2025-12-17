@@ -79,6 +79,17 @@ int Stock::getDataSize(){
     return dates.size();
 }
 
+double Stock::getClosePrice(int index){
+    if(index>=0 && index<closePrices.size())
+        return closePrices[index];
+    return 0;
+}
+
+vector<double> Stock::getAllClosePrices(){
+    return closePrices;
+}
+
+
 void Stock::displaySummary()
 {
     cout << "\n===" << symbol << " - " << name << "===" << endl;
