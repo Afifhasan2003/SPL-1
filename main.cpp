@@ -4,6 +4,8 @@
 #include "./include/Stock.h"
 #include "./include/Portfolio.h"
 #include "include/Analytics.h"
+#include "include/Strategy.h"
+#include "include/Backtester.h"
 
 using namespace std;
 
@@ -17,7 +19,8 @@ void displayMainMenu()
     cout << "3. View Stock Info" << endl;
     cout << "4. View Indicators" << endl;
     cout << "5. View Analytics" << endl;
-    cout << "6. Exit"<<endl;
+    cout << "6. Backtest Strategy" << endl;
+    cout << "7. Exit"<<endl;
     cout << "======================================" << endl;
     cout << "Enter choice: ";
 }
@@ -197,8 +200,9 @@ int main()
             cout << "Enter company name: ";
             cin.ignore();
             getline(cin, name);
-            cout << "Enter CSV filename: ";
-            getline(cin, filename);
+            // cout << "Enter CSV filename: ";
+            // getline(cin, filename);
+            filename = "data/AAPL.csv";
 
             Stock *newStock = new Stock(symbol, name);
 
@@ -492,7 +496,67 @@ int main()
             }
 
         }
-        else if (choice == 6)   //Exit
+        else if(choice == 6){   //Backtesting Strategy
+            if(stocks.empty()){
+                cout<<"\nNo Stocks loaded yet"<<endl;
+            }
+            else{
+                cout<<"\n===Loaded Stocks==="<<endl;
+                for(auto& pair : stocks){
+                    cout<<"- "<<pair.first<<endl;
+                }
+                string symbol;
+                cout<<"Enter symbol: ";
+                cin>>symbol;
+
+                if(stocks.find(symbol) == stocks.end()){
+                    cout<<"stock not founc"<<endl;
+                }
+                else{
+                    cout << "\n=== Select Strategy ===" << endl;
+                    cout << "1. RSI Strategy (Buy < 30, Sell > 70)" << endl;
+                    cout << "2. Moving Average Crossover" << endl;
+                    cout << "3. Buy and Hold" << endl;
+                    cout << "Enter choice: ";
+
+                    int stratChoice;
+                    cin>>stratChoice;
+
+                    Strategy* strategy = nullptr;
+                    if(stratChoice == 1){
+                        strategy = new RSIStrategy();
+                    }
+                    else if (stratChoice==2)
+                    {
+                        strategy = new MAStrategy();
+                    }
+                    else if (stratChoice==3)
+                    {
+                        strategy = new BuyHoldStrategy();
+                    }
+                    else{
+                        cout<<"invalid choise.."<<endl;
+                        continue;
+                    }
+                    
+                    double giveCash;
+                    cout<<"Enter initial Cash: $";
+                    cin>>giveCash;
+
+
+                    //run backtester
+                    Backtester backtester(stocks[symbol],strategy,giveCash);
+                    backtester.run();
+                    backtester.displayResult();
+
+                    delete strategy;
+                }
+
+
+            }
+
+        }
+        else if (choice == 7)   //Exit
         {
             cout << "\nThank you for using Finance Bazar!" << endl;
             break;
