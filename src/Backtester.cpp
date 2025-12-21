@@ -36,7 +36,7 @@ void Backtester::run(){
     {
         double currPrice = stock->getClosePrice(day);
 
-        cout<<day<<".currPrice: "<<currPrice;
+        // cout<<day<<".currPrice: "<<currPrice;
     
         //buy signal
         if(strategy->shouldBuy(stock,day,holding)){
