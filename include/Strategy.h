@@ -52,6 +52,21 @@ public:
     bool shouldSell(Stock* stock, int day, bool currentlyHolding) override;
 };
 
+//MACD strategy: buy when MACD crosses above signal,sell when crosses below
+class MACDStrategy : public Strategy{
+public:
+    MACDStrategy();
+    bool shouldBuy(Stock* stock, int day, bool currentHolding) override;
+    bool shouldSell(Stock* stock, int day, bool currentHolding) override;
+};
+
+//momentum Strategy : Buy when momentum > 5% , sell when < -5%
+class MomentumStrategy : public Strategy {
+public:
+    MomentumStrategy();
+    bool shouldBuy(Stock* stock, int day, bool currentHolding) override;
+    bool shouldSell(Stock* stock, int day, bool currentHolding) override;   
+};
 
 
 #endif

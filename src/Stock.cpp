@@ -224,6 +224,7 @@ void Stock::calculateMACD(){
             macd.push_back(val);
         }
     }
+    
 
     // calculate signal line = 9-day ema of macd
     double multiplier = 2.0 / (9 + 1);
@@ -243,7 +244,7 @@ void Stock::calculateMACD(){
             }
             macdSignal.push_back(sum / 9);
         }
-        else
+        else    // rest of the days
         {
             double signal = (macd[i] * multiplier) + (macdSignal[i - 1] * (1 - multiplier));
             macdSignal.push_back(signal);
@@ -316,7 +317,7 @@ void Stock::calculateMomentum(int period){
     }
 }
 
-void Stock::calculateRSI(int period)
+void Stock::calculateRSI(int period)    // relative strength index, 
 {
     rsi.clear();
     if (closePrices.size() < period + 1)
@@ -328,7 +329,7 @@ void Stock::calculateRSI(int period)
     // rs=gains/losses of period time
     vector<double> gains;
     vector<double> losses;
-    for (int i = 1; i < closePrices.size(); i++)
+    for (int i = 1; i < closePrices.size(); i++)    //calculate all gains, losses
     {
         double change = closePrices[i] - closePrices[i - 1];
         if (change > 0)
@@ -348,7 +349,7 @@ void Stock::calculateRSI(int period)
     double gainSum = 0.0, avgGain, avgLoss,rs,rsiVal;
     double lossSum = 0.0;
    
-    for (int i = 0; i < period-1; i++)  //first 14days
+    for (int i = 0; i < period-1; i++)  //first 13 days
     {
         gainSum += gains[i];
         lossSum += losses[i];
@@ -356,22 +357,35 @@ void Stock::calculateRSI(int period)
         rsi.push_back(0.0);
     }
 
-    for(int i = period -1 ;i<gains.size(); i++){
-        gainSum += gains[i];
-        lossSum += losses[i];
-
+    // day 14
+    {
+        gainSum += gains[period -1];
+        lossSum += losses[period -1];
         avgGain = gainSum/period;
         avgLoss = lossSum/period;
         if(avgLoss == 0.0)
             rsi.push_back(100);
         else{
             rs=avgGain/avgLoss;
-            rsiVal=100 - (100/(1+rs));
+            rsiVal=100 - (100/(1.0+rs));
+            rsi.push_back(rsiVal);
+        }
+    }
+    // rest of the days 
+    for(int i = period ;i<gains.size(); i++){
+        
+        // Wilder's smoothing method
+        avgGain = ((avgGain * (period - 1)) + gains[i]) / period;
+        avgLoss = ((avgLoss * (period - 1)) + losses[i]) / period;
+
+        if(avgLoss == 0.0)
+            rsi.push_back(100);
+        else{
+            rs=avgGain/avgLoss;
+            rsiVal=100 - (100/(1.0+rs));
             rsi.push_back(rsiVal);
         }
 
-        gainSum -= gains[i-period];
-        lossSum -=losses[i-period];
     }
 
 }

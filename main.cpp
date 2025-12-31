@@ -6,6 +6,7 @@
 #include "include/Analytics.h"
 #include "include/Strategy.h"
 #include "include/Backtester.h"
+#include <iomanip>
 
 using namespace std;
 
@@ -202,7 +203,8 @@ int main()
             getline(cin, name);
             // cout << "Enter CSV filename: ";
             // getline(cin, filename);
-            filename = "data/AAPL.csv";
+            // filename = "data/AAPL.csv";
+            filename = "data/AAPL2.csv";
 
             Stock *newStock = new Stock(symbol, name);
 
@@ -282,13 +284,13 @@ int main()
                     cout << "\n=== Technical Indicators for " << symbol << " ===" << endl;
 
                     // Submenu for indicators
-                    cout << "\n1. View Moving Averages (SMA)" << endl;
+                    {cout << "\n1. View Moving Averages (SMA)" << endl;
                     cout << "2. View RSI" << endl;
                     cout << "3. View MACD" << endl;
                     cout << "4. View Bollinger Bands" << endl;
                     cout << "5. View Momentum" << endl;
                     cout << "6. View All Indicators Summary" << endl;
-                    cout << "Enter choice: ";
+                    cout << "Enter choice: ";}
 
                     int indicatorChoice;
                     cin >> indicatorChoice;
@@ -516,40 +518,102 @@ int main()
                     cout << "\n=== Select Strategy ===" << endl;
                     cout << "1. RSI Strategy (Buy < 30, Sell > 70)" << endl;
                     cout << "2. Moving Average Crossover" << endl;
-                    cout << "3. Buy and Hold" << endl;
+                    cout << "3. MACD Strategy" <<endl;
+                    cout << "4. Momentum Strategy" <<endl;
+                    cout << "5. Buy and Hold" << endl;
+                    cout << "6. Compare All Strategy"<<endl<<endl;
+                    
                     cout << "Enter choice: ";
-
                     int stratChoice;
                     cin>>stratChoice;
-
-                    Strategy* strategy = nullptr;
-                    if(stratChoice == 1){
-                        strategy = new RSIStrategy();
-                    }
-                    else if (stratChoice==2)
-                    {
-                        strategy = new MAStrategy();
-                    }
-                    else if (stratChoice==3)
-                    {
-                        strategy = new BuyHoldStrategy();
-                    }
-                    else{
-                        cout<<"invalid choise.."<<endl;
-                        continue;
-                    }
-                    
                     double giveCash;
                     cout<<"Enter initial Cash: $";
                     cin>>giveCash;
 
+                    if(stratChoice!=6){     //single strategy
+                        Strategy* strategy = nullptr;
+                        if(stratChoice == 1){
+                            strategy = new RSIStrategy();
+                        }
+                        else if (stratChoice==2)
+                        {
+                            strategy = new MAStrategy();
+                        }
+                        else if(stratChoice==3){
+                            strategy = new MACDStrategy();
+                        }
+                        else if(stratChoice==4){
+                            strategy = new MomentumStrategy();
+                        }
+                        else if (stratChoice==5)
+                        {
+                            strategy = new BuyHoldStrategy();
+                        }
 
-                    //run backtester
-                    Backtester backtester(stocks[symbol],strategy,giveCash);
-                    backtester.run();
-                    backtester.displayResult();
+                        //run backtester
+                        Backtester backtester(stocks[symbol],strategy,giveCash);
+                        backtester.run();
+                        backtester.displayResult();
 
-                    delete strategy;
+                        delete strategy;
+                    }
+                    else if (stratChoice==6)    //all strategy
+                    {
+                        Strategy* strategy[] ={
+                            new RSIStrategy(),
+                            new MAStrategy(),
+                            new MACDStrategy(),
+                            new MomentumStrategy(),
+                            new BuyHoldStrategy()
+                        };
+
+                        vector<double> returns;
+                        vector<string> names;
+
+                        for (int i = 0; i < 5; i++) // returns of each strategy
+                        {
+                            Backtester backtester(stocks[symbol],strategy[i],giveCash);
+                            backtester.run();
+                            returns.push_back(backtester.getTotalReturn());
+                            names.push_back(strategy[i]->getName());
+                        }
+
+                        cout<<"##Comparison of returns of"<< stocks[symbol]->getName() <<" company for different Strategies  with initial cash "<< giveCash <<" ##"<<endl;
+
+
+                        cout<<fixed<<setprecision(2);
+
+                        int bestInd = 0;
+                        double bestReturn = returns[0];
+                        for (int i = 0; i < returns.size(); i++)
+                        {
+                            if(returns[i]>bestReturn){
+                                bestReturn=returns[i];
+                                bestInd = i;
+                            }
+                        }
+
+                        for (int i = 0; i < returns.size(); i++)
+                        {
+                            cout<<i+1<< ". "<<names[i]<<endl;
+                            cout<< "\tReturns: "<<returns[i]<<"%";
+                             if(i==bestInd) cout<<" $best";  cout<<endl;
+                            cout<< "\tFinal Value: "<<giveCash + giveCash *( returns[i]/100 ) <<endl;
+                            
+                        }
+                        
+                        cout<<"==========================================="<<endl;
+                        cout<<"best strategy: "<<names[bestInd]<<endl;
+                        cout<<"best Return: " <<bestReturn<<"%"<<endl;
+
+
+                    }
+                    else
+                    {
+                        cout<<"invalid choise.."<<endl;
+                        continue;
+                    }
+                    
                 }
 
 
