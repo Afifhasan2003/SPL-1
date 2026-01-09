@@ -8,6 +8,8 @@
 #include "include/Backtester.h"
 #include <iomanip>
 #include <filesystem>
+#include <fstream>
+
 
 using namespace std;
 namespace fs = std::filesystem; // fs is an alias, to avoid writing std::filesystem every time
@@ -17,7 +19,7 @@ bool loadStockIfNeeded(string symbol, map<string, Stock*>& stocks) {
         return true;
     }
     
-    string filename = "data/" + symbol + ".csv";
+    string filename = "data/stocks/" + symbol + ".csv";
     
     if (!fs::exists(filename)) {
         cout << "Error: " << symbol << " not found" << endl;
@@ -83,19 +85,9 @@ void displaySelectedPortfolioMenu(string portfolioName)
     cout << "Enter choice: ";
 }
 
-void loadPortfolios(vector<Portfolio *> portfolios)
-{
-}
-
-int main()
-{
-    map<string, Stock *> stocks;    // symbol -> Stock object
-    vector<Portfolio *> portfolios; // All portfolios
-
-    cout << "\n*** Welcome to QuantLab ***\n"<< endl;
-
-         
-        cout << " Loading saved Portfolios ... ... " << endl;
+void loadPortfolios(vector<Portfolio *> &portfolios)
+{    
+       cout << " Loading saved Portfolios ... ... " << endl;
         try
         {
             if (fs::exists("portfolios") && fs::is_directory("portfolios"))
@@ -126,6 +118,49 @@ int main()
 
         if (portfolios.size() > 0)
             cout << "\n Portfolios loaded successfully" << endl;
+    
+}
+
+void loadStocksFromWatchlist(map<string, Stock*>& stocks){
+        // Auto-load stocks from watchlist
+    cout << "\nLoading watchlist stocks..." << endl;
+    ifstream watchlistFile("watchList.txt");
+    
+    if (watchlistFile.is_open()) {
+        string symbol;
+        int loadedCount = 0;
+        
+        while (getline(watchlistFile, symbol)) {
+            // Trim whitespace
+            symbol.erase(0, symbol.find_first_not_of(" \t\r\n"));
+            symbol.erase(symbol.find_last_not_of(" \t\r\n") + 1);
+            
+            if (symbol.empty()) continue;
+            
+            if (loadStockIfNeeded(symbol, stocks)) {
+                loadedCount++;
+            }
+        }
+        
+        watchlistFile.close();
+        
+        if (loadedCount > 0) {
+            cout << "\n✓ " << loadedCount << " stock(s) loaded from watchlist!" << endl;
+        }
+    } else {
+        cout << "Note: No watchlist.txt found. You can create one with stock symbols (one per line)." << endl;
+    }
+}
+int main()
+{
+    map<string, Stock *> stocks;    // symbol -> Stock object
+    vector<Portfolio *> portfolios; // All portfolios
+
+    cout << "\n*** Welcome to QuantLab ***\n"<< endl;
+
+    loadPortfolios(portfolios);
+    loadStocksFromWatchlist(stocks);
+
     
 
     while (true)
