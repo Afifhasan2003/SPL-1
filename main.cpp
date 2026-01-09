@@ -80,7 +80,8 @@ void displaySelectedPortfolioMenu(string portfolioName)
     cout << "4. View holdings" << endl;
     cout << "5. View transactions" << endl;
     cout << "6. View summary" << endl;
-    cout << "7. Back" << endl;
+    cout << "7. View performance analytics "<<endl;
+    cout << "8. Back" << endl;
     cout << "======================================" << endl;
     cout << "Enter choice: ";
 }
@@ -316,7 +317,14 @@ int main()
                                 cout<<"\tno stocks loaded yeetttt"<<endl;
                             currentPortfolio->displaySummary(stocks);
                         }
-                        else if (action == 7)
+                        else if(action == 7){
+                            if(stocks.empty())
+                                cout<<"worning! no stocks loaded yet";
+
+                            currentPortfolio->displayPerformanceAnalytics(stocks);
+                            
+                        }
+                        else if (action == 8)
                             break;
                         else
                             cout << "Invalid choice." << endl;

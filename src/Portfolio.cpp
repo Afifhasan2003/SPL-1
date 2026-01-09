@@ -1,7 +1,9 @@
 #include "../include/Portfolio.h" //have to use double quotes for user-defined header files
 #include <iostream>
 #include <fstream>
+#include <sstream>
 #include <iomanip>
+#include <cmath>
 
 using namespace std;
 
@@ -222,6 +224,123 @@ void Portfolio::displayDetailedSummary( map<string, Stock*>& stockData)  {
     cout << "Cash: " << cashAllocation << "% of portfolio" << endl;
 }
 
+
+void Portfolio::displayPerformanceAnalytics(map<string, Stock*>& stockData){
+        if (holdings.empty()) {
+        cout << "\nNo holdings to analyze." << endl;
+        return;
+    }
+    
+    // Calculate total cost basis and current value
+    double totalCost = 0.0;
+    double currentValue = 0.0;   //of the portfolio
+    bool hasMissingData = false;
+    
+    for (auto& pair : holdings) {
+        Holding& h = pair.second;
+        double costBasis = h.quantity * h.avgCost;
+        totalCost += costBasis;
+        
+        if (stockData.find(h.symbol) != stockData.end()) {
+            Stock* stock = stockData.at(h.symbol);
+            int lastIndex = stock->getDataSize() - 1;
+            double currentPrice = stock->getClosePrice(lastIndex);
+            currentValue += h.quantity * currentPrice;
+        } else {
+            currentValue += costBasis;
+            hasMissingData = true;
+        }
+    }
+    
+    cout << "\n=== Portfolio Performance Analytics ===" << endl;
+    cout << "Portfolio: " << name << endl;
+    cout << "---------------------------------------" << endl;
+    cout << fixed << setprecision(2);
+    
+    // Total return
+    double totalReturn = ((currentValue - totalCost) / totalCost) * 100.0;
+    cout << "\nReturn Metrics:" << endl;
+    cout << "  Initial Investment: $" << totalCost << endl;
+    cout << "  Current Value: $" << currentValue << endl;
+    cout << "  Total Return: ";
+    if (totalReturn >= 0) {
+        cout << "+" << totalReturn << "%";
+    } else {
+        cout << totalReturn << "%";
+    }
+    cout << endl;
+    
+    // Calculate portfolio volatility (weighted average)
+    if (!hasMissingData && !holdings.empty()) {
+        double weightedVolatility = 0.0;
+        
+        for (const auto& pair : holdings) {
+            const Holding& h = pair.second;
+            if (stockData.find(h.symbol) != stockData.end()) {
+                Stock* stock = stockData.at(h.symbol);
+                
+                // Calculate stock's contribution to portfolio value
+                int lastIndex = stock->getDataSize() - 1;
+                double currentPrice = stock->getClosePrice(lastIndex);
+                double stockValue = h.quantity * currentPrice;
+                double weight = stockValue / currentValue;
+                
+                // Get stock's daily returns
+                vector<double> returns;
+                for (int i = 1; i < stock->getDataSize(); i++) {
+                    double today = stock->getClosePrice(i);
+                    double yesterday = stock->getClosePrice(i - 1);
+                    if (yesterday != 0) {
+                        double ret = ((today - yesterday) / yesterday) * 100.0;
+                        returns.push_back(ret);
+                    }
+                }
+                
+                // Calculate volatility from returns
+                if (returns.size() > 1) {
+                    double mean = 0.0;
+                    for (double r : returns) mean += r;
+                    mean /= returns.size();
+                    
+                    double variance = 0.0;
+                    for (double r : returns) {
+                        double diff = r - mean;
+                        variance += diff * diff;
+                    }
+                    variance /= returns.size();
+                    double stdDev = sqrt(variance);
+                    double annualizedVol = stdDev * sqrt(252);
+                    
+                    // Add weighted contribution
+                    weightedVolatility += weight * annualizedVol;
+                }
+            }
+        }
+        
+        cout << "\nRisk Metrics:" << endl;
+        cout << "  Portfolio Volatility: " << weightedVolatility << "%" << endl;
+        
+        // Sharpe Ratio (assuming 2% risk-free rate)
+        double riskFreeRate = 2.0;
+        if (weightedVolatility > 0) {
+            double sharpeRatio = (totalReturn - riskFreeRate) / weightedVolatility;
+            cout << "  Sharpe Ratio: " << sharpeRatio << endl;
+        }
+    }
+    
+    // Diversification
+    cout << "\nDiversification:" << endl;
+    cout << "  Number of Holdings: " << holdings.size() << endl;
+    
+    if (hasMissingData) {
+        cout << "\n⚠ Note: Some stocks not loaded. Load all holdings for complete analytics." << endl;
+    }
+    
+    cout << "=======================================" << endl;
+
+
+}
+
 bool Portfolio::hasStock(string symbol){
     return holdings.find(symbol) != holdings.end();
 }
@@ -239,10 +358,10 @@ bool Portfolio::saveToFile(string filename){
         cout<<"could not save to "<<filename<<endl;
         return false;
     }
-    file<< "Portfolio_name: "<<name<<endl;
-    file<< "Cash: "<<cashBalance<<endl;
+    file<< "Portfolio_name:"<<name<<endl;
+    file<< "Cash:"<<cashBalance<<endl;
 
-    file<< "Holdings: "<<endl;
+    file<< "Holdings:"<<endl;
     for(auto pair: holdings){
         Holding &h=pair.second;
         file<<h.symbol<<","<<h.quantity<<","<<h.avgCost<<","<<h.purchaseDate<<endl;
@@ -272,12 +391,12 @@ bool Portfolio::loadFromFile(string filename){
         if (line.empty())
             continue;
         
-        else if (line=="Holdings")
+        else if (line=="Holdings:")
         {
             section="holding"; 
             continue;
         }
-        else if(line=="Transactions"){
+        else if(line=="Transactions:"){
             section = "tran";
             continue;
         }
