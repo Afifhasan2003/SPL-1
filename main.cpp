@@ -12,6 +12,32 @@
 using namespace std;
 namespace fs = std::filesystem; // fs is an alias, to avoid writing std::filesystem every time
 
+bool loadStockIfNeeded(string symbol, map<string, Stock*>& stocks) {
+    if (stocks.find(symbol) != stocks.end()) {  //already loaded
+        return true;
+    }
+    
+    string filename = "data/" + symbol + ".csv";
+    
+    if (!fs::exists(filename)) {
+        cout << "Error: " << symbol << " not found" << endl;
+        return false;
+    }
+    
+    // Load the stock
+    Stock* newStock = new Stock(symbol, symbol);
+    
+    if (newStock->loadFromCSV(filename)) {
+        stocks[symbol] = newStock;
+        cout << symbol << " loaded successfully!" << endl;
+        return true;
+    } else {
+        cout << " Failed to load " << symbol << endl;
+        delete newStock;
+        return false;
+    }
+}
+
 void displayMainMenu()
 {
     cout << "\n======================================" << endl;
@@ -200,6 +226,12 @@ int main()
 
                             cout << "Enter stock symbol: ";
                             cin >> symbol;
+
+                            if (!loadStockIfNeeded(symbol, stocks)) {
+                                cout << "Cannot buy " << symbol << ". Stock not available." << endl;
+                                continue;
+                            }
+
                             cout << "Enter quantity: ";
                             cin >> quantity;
                             cout << "Enter price per share: $";
