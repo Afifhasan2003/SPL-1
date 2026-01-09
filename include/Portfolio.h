@@ -41,7 +41,7 @@ public:
 
 
     bool hasStock(string symbol);
-    int getquanity(string symbol);
+    int getQuanity(string symbol);
 
     bool saveToFile(string filename);
     bool loadFromFile(string filename);
