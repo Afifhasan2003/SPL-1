@@ -7,8 +7,10 @@
 #include "include/Strategy.h"
 #include "include/Backtester.h"
 #include <iomanip>
+#include <filesystem>
 
 using namespace std;
+namespace fs = std::filesystem;     //fs is an alias, to avoid writing std::filesystem every time
 
 void displayMainMenu()
 {
@@ -60,7 +62,37 @@ int main()
     map<string, Stock *> stocks;    // symbol -> Stock object
     vector<Portfolio *> portfolios; // All portfolios 
 
-    cout << "\n*** Welcome to Finance Bazar ***\n"<< endl;
+    cout << "\n*** Welcome to QuantLab ***\n"<< endl;
+
+    {   //loading portfolios
+        cout <<" Loading saved Portfolios ... ... "<<endl;
+    try
+    {
+        if(fs::exists("portfolios") && fs::is_directory("portfolio")){
+            for(auto& each: fs::directory_iterator("portfolio")){
+                if(each.path().extension() == ".csv"){
+                    Portfolio* p = new Portfolio("");
+                    if(p->loadFromFile(each.path().string())){
+                        cout<<" loaded- "<<p->getName()<<endl;
+                    }
+                    else{
+                        cout<<"something went wrong with loading "<<p->getName()<<endl;
+                        delete p;
+                    }
+                }
+            }
+        }
+    }
+    catch(const std::exception& e)
+    {
+        cout<<"No portfolios...";
+    }
+
+    if(portfolios.size()>0)
+        cout<<"\n Portfolios loaded successfully"<<endl;
+}
+        
+    
 
     while (true)
     {
@@ -85,6 +117,14 @@ int main()
 
                     Portfolio *newPortfolio = new Portfolio(name);
                     portfolios.push_back(newPortfolio);
+
+                    string filename = "portfolios/" + name + ".csv";
+
+                    for(char& c: filename) //if space used in portfolio name 
+                        if(c==' ') c = '_';
+
+                    newPortfolio->saveToFile(filename);
+
 
                     cout << "\t\tNew Portfolio '" << name << "' created!" << endl;
                 }

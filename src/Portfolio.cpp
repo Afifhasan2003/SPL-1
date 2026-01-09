@@ -5,6 +5,7 @@
 
 using namespace std;
 
+//a constructor without an argument is by default provided by the compiler in C++, unlike Java
 // constructor
 Portfolio::Portfolio(string portfolioName)
 {
