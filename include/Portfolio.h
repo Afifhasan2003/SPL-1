@@ -38,6 +38,7 @@ public:
     void displayHoldings();
     void displayTransactions();
     void displaySummary(map<string,Stock*>& stockData);
+    void displayDetailedSummary(map<string,Stock*>& stockData );
 
 
     bool hasStock(string symbol);

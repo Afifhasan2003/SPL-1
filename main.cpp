@@ -244,8 +244,11 @@ int main()
                             currentPortfolio->displayHoldings();
                         else if (action == 5)
                             currentPortfolio->displayTransactions();
-                        else if (action == 6)
+                        else if (action == 6){
+                            if(stocks.empty()) 
+                                cout<<"\tno stocks loaded yeetttt"<<endl;
                             currentPortfolio->displaySummary(stocks);
+                        }
                         else if (action == 7)
                             break;
                         else
