@@ -6,6 +6,9 @@
 #include "include/Analytics.h"
 #include "include/Strategy.h"
 #include "include/Backtester.h"
+#include "include/MenuSystem.h"
+#include "include/UIHelpers.h"
+#include "include/StockManager.h"
 #include <iomanip>
 #include <filesystem>
 #include <fstream>
@@ -13,83 +16,7 @@
 using namespace std;
 namespace fs = std::filesystem; // fs is an alias, to avoid writing std::filesystem every time
 
-bool loadStockIfNeeded(string symbol, map<string, Stock *> &stocks)
-{
-    if (stocks.find(symbol) != stocks.end())
-    { // already loaded
-        return true;
-    }
 
-    string filename = "data/stocks/" + symbol + ".csv";
-
-    if (!fs::exists(filename))
-    {
-        cout << "Error: " << symbol << " not found" << endl;
-        return false;
-    }
-
-    // Load the stock
-    Stock *newStock = new Stock(symbol, symbol);
-
-    if (newStock->loadFromCSV(filename))
-    {
-        stocks[symbol] = newStock;
-        cout << symbol << " loaded successfully!" << endl;
-        return true;
-    }
-    else
-    {
-        cout << " Failed to load " << symbol << endl;
-        delete newStock;
-        return false;
-    }
-}
-
-void displayMainMenu()
-{
-    cout << "\n======================================" << endl;
-    cout << "      Finance Bazar - Main Menu" << endl;
-    cout << "======================================" << endl;
-    cout << "1. Manage Portfolios" << endl;
-    cout << "2. Load Stock Data" << endl;
-    cout << "3. View Stock Info" << endl;
-    cout << "4. View Indicators" << endl;
-    cout << "5. View Analytics" << endl;
-    cout << "6. Backtest Strategy" << endl;
-    cout << "7. Exit" << endl;
-    cout << "======================================" << endl;
-    cout << "Enter choice: ";
-}
-
-void displayPortfolioMenu()
-{
-    cout << "\n======================================" << endl;
-    cout << "      Portfolio Management" << endl;
-    cout << "======================================" << endl;
-    cout << "1. Create new portfolio" << endl;
-    cout << "2. View all portfolios" << endl;
-    cout << "3. Select portfolio" << endl;
-    cout << "4. Back to main menu" << endl;
-    cout << "======================================" << endl;
-    cout << "Enter choice: ";
-}
-
-void displaySelectedPortfolioMenu(string portfolioName)
-{
-    cout << "\n======================================" << endl;
-    cout << "  Portfolio: " << portfolioName << endl;
-    cout << "======================================" << endl;
-    cout << "1. Add cash" << endl;
-    cout << "2. Buy stock" << endl;
-    cout << "3. Sell stock" << endl;
-    cout << "4. View holdings" << endl;
-    cout << "5. View transactions" << endl;
-    cout << "6. View summary" << endl;
-    cout << "7. View performance analytics " << endl;
-    cout << "8. Back" << endl;
-    cout << "======================================" << endl;
-    cout << "Enter choice: ";
-}
 
 void loadPortfolios(vector<Portfolio *> &portfolios)
 {
@@ -146,7 +73,7 @@ void loadStocksFromWatchlist(map<string, Stock *> &stocks)
             if (symbol.empty())
                 continue;
 
-            if (loadStockIfNeeded(symbol, stocks))
+            if (UIHelpers::loadStockIfNeeded(symbol, stocks))
             {
                 loadedCount++;
             }
@@ -165,69 +92,6 @@ void loadStocksFromWatchlist(map<string, Stock *> &stocks)
     }
 }
 
-pair<int, int> getDateRange(Stock *stock)
-{
-    int dataSize = stock->getDataSize();
-
-    cout << "\n=== Select Time Period ===" << endl;
-    cout << "1. Last 30 days" << endl;
-    cout << "2. Last 90 days (3 months)" << endl;
-    cout << "3. Last 180 days (6 months)" << endl;
-    cout << "4. Last 365 days (1 year)" << endl;
-    cout << "5. All time" << endl;
-    cout << "6. Custom range" << endl;
-    cout << "Enter choice: ";
-
-    int choice;
-    cin >> choice;
-
-    int startDay = 0;
-    int endDay = dataSize - 1;
-
-    if (choice == 1)
-    {
-        startDay = max(0, endDay - 30);
-    }
-    else if (choice == 2)
-    {
-        startDay = max(0, endDay - 90);
-    }
-    else if (choice == 3)
-    {
-        startDay = max(0, endDay - 180);
-    }
-    else if (choice == 4)
-    {
-        startDay = max(0, endDay - 365);
-    }
-    else if (choice == 5)
-    {
-        startDay = 0;
-    }
-    else if (choice == 6)
-    {
-        cout << "Enter start day (0 to " << endDay << "): ";
-        cin >> startDay;
-        cout << "Enter end day (" << startDay << " to " << endDay << "): ";
-        cin >> endDay;
-
-        if (startDay < 0)
-            startDay = 0;
-        if (endDay >= dataSize)
-            endDay = dataSize - 1;
-        if (startDay > endDay)
-            startDay = endDay;
-    }
-    else
-    {
-        cout << "Invalid choice. Using all time." << endl;
-    }
-
-    // int numDays = endDay - startDay + 1;
-    // cout << " Analyzing " << numDays << " days of data" << endl;
-
-    return make_pair(startDay, endDay);
-}
 
 int main()
 {
@@ -242,7 +106,7 @@ int main()
 
     while (true)
     {
-        displayMainMenu();
+        MenuSystem::displayMainMenu();
         int choice;
         cin >> choice;
 
@@ -250,7 +114,7 @@ int main()
         {
             while (true)
             {
-                displayPortfolioMenu();
+                MenuSystem::displayPortfolioMenu();
                 int portfolioChoice;
                 cin >> portfolioChoice;
 
@@ -313,7 +177,7 @@ int main()
                     // Selected portfolio menu
                     while (true)
                     {
-                        displaySelectedPortfolioMenu(currentPortfolio->getName());
+                        MenuSystem::displaySelectedPortfolioMenu(currentPortfolio->getName());
                         int action;
                         cin >> action;
 
@@ -340,7 +204,7 @@ int main()
                             cout << "Enter stock symbol: ";
                             cin >> symbol;
 
-                            if (!loadStockIfNeeded(symbol, stocks))
+                            if (!UIHelpers::loadStockIfNeeded(symbol, stocks))
                             {
                                 cout << "Cannot buy " << symbol << ". Stock not available." << endl;
                                 continue;
@@ -422,67 +286,11 @@ int main()
             }
         }
         else if (choice == 2) // load stock data
-        {
-            string symbol, name, filename;
-
-            cout << "\nEnter stock symbol: ";
-            cin >> symbol;
-            cout << "Enter company name: ";
-            cin.ignore();
-            getline(cin, name);
-            // cout << "Enter CSV filename: ";
-            // getline(cin, filename);
-            // filename = "data/AAPL.csv";
-            filename = "data/AAPL2.csv";
-
-            Stock *newStock = new Stock(symbol, name);
-
-            if (newStock->loadFromCSV(filename))
-            {
-                stocks[symbol] = newStock;
-                cout << "✓ Successfully loaded " << symbol << "!" << endl;
-            }
-            else
-            {
-                cout << "✗ Failed to load stock." << endl;
-                delete newStock;
-            }
-        }
+            StockManager::loadStockData(stocks);
+        
         else if (choice == 3) // view stock info
-        {
-            if (stocks.empty())
-            {
-                cout << "\nNo stocks loaded yet." << endl;
-            }
-            else
-            {
-                cout << "\n=== Loaded Stocks ===" << endl;
-                for (auto &pair : stocks)
-                {
-                    cout << "- " << pair.first << endl;
-                }
-
-                string symbol;
-                cout << "Enter symbol to view: ";
-                cin >> symbol;
-
-                if (stocks.find(symbol) != stocks.end())
-                {
-                    stocks[symbol]->displaySummary();
-
-                    int days;
-                    cout << "\nShow recent days (0 to skip): ";
-                    cin >> days;
-
-                    if (days > 0)
-                    {
-                        stocks[symbol]->displayRecentData(days);
-                    }
-                }
-                else
-                    cout << "Stock not found." << endl;
-            }
-        }
+            StockManager::viewStockInfo(stocks);
+        
         else if (choice == 4) // view indicators
         {
             // here stocks is the loaded stock from csv files, not my portfolio stocks
@@ -723,7 +531,7 @@ int main()
 
                 if (stocks.find(sym) != stocks.end())
                 {
-                    pair dateRAnge = getDateRange(stocks[sym]);
+                    pair dateRAnge = UIHelpers::getDateRange(stocks[sym]);
                     int st = dateRAnge.first, end = dateRAnge.second;
                     Analytics::displayAnalyticsReport(stocks[sym], st, end);
                 }
@@ -771,7 +579,7 @@ int main()
                     cout << "Enter initial Cash: $";
                     cin >> giveCash;
 
-                    pair range = getDateRange(stocks[symbol]);
+                    pair range = UIHelpers::getDateRange(stocks[symbol]);
 
                     if (stratChoice != 6)
                     { // single strategy
