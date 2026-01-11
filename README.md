@@ -32,3 +32,7 @@ A C++ application for managing investment portfolios and analyzing stock perform
 ## How to Run
 g++ -std=c++17 main.cpp src/Stock.cpp src/Portfolio.cpp src/Analytics.cpp src/Strategy.cpp src/Backtester.cpp -o quantlab
 ./quantlab
+
+
+##indicator vs analytics
+indicators are like signals, of when to buy or sell. ... analytics are more like how the stock or portfolio is performing

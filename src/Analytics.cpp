@@ -6,10 +6,13 @@
 using namespace std;
 
  vector<double> Analytics::calculateDailyReturns(Stock* stock){
+    return calculateDailyReturns(stock,1, stock->getDataSize()-1);
+ }
+ 
+ vector<double> Analytics::calculateDailyReturns(Stock* stock, int startDay, int endDay){
     vector<double> returns;
-    int dataSize = stock->getDataSize();
 
-    for (int i = 1; i < dataSize; i++)
+    for (int i = startDay; i <= endDay; i++)
     {
         double today = stock->getClosePrice(i);
         double yesterday = stock->getClosePrice(i-1);
@@ -22,11 +25,17 @@ using namespace std;
 return returns;
  }
 
- double Analytics::calculateCumulativeReturn(Stock* stock){
-    int dataSize = stock->getDataSize();
-    if(dataSize<2) return 0;
-    double firstClose = stock->getClosePrice(0);
-    double lastClose = stock->getClosePrice(dataSize-1);
+  double Analytics::calculateCumulativeReturn(Stock* stock){
+    return calculateCumulativeReturn(stock, 0, stock->getDataSize()-1);
+  }
+
+ double Analytics::calculateCumulativeReturn(Stock* stock, int startDay, int endDay){
+    
+    if(startDay > endDay || startDay<0 ) 
+        return 0;
+
+    double firstClose = stock->getClosePrice(startDay);
+    double lastClose = stock->getClosePrice(endDay);
     if(firstClose==0) return 0;
 
     double cumulative = ((lastClose - firstClose)/firstClose )*100;
@@ -51,7 +60,7 @@ return returns;
 
     double sharpe = (annualReturn - riskFreeRate) / vol;
     return sharpe;
-
+    // risk free ra
  } 
  double Analytics::calculateMaxDrawdown(Stock* stock){
     int dataSize = stock->getDataSize();
@@ -78,19 +87,23 @@ return returns;
 
 
  }
+
  void Analytics::displayAnalyticsReport(Stock* stock){
+    displayAnalyticsReport(stock, 0, stock->getDataSize()-1);
+ }
+
+ void Analytics::displayAnalyticsReport(Stock* stock, int startDay, int endDay){
     cout << "\n=== Analytics Report for " << stock->getSymbol() << " ===" << endl;
     cout << fixed << setprecision(2);
     
-    vector<double> returns = calculateDailyReturns(stock);
+    vector<double> returns = calculateDailyReturns(stock, startDay, endDay);
     
-    cout << "\nPerformance Metrics:" << endl;
+    cout << "\nPerformance Metrics: From day: "<<startDay<<" to: " <<endDay <<" ("<< (endDay-startDay+1) <<" days)"<< endl;
     cout << "-----------------------------------" << endl;
-    cout << "Cumulative Return: " << calculateCumulativeReturn(stock) << "%" << endl;
+    cout << "Cumulative Return: " << calculateCumulativeReturn(stock,startDay, endDay) << "%" << endl;
     cout << "Volatility (Annualized): " << calculateVolatility(returns) << "%" << endl;
-    cout << "Sharpe Ratio: " << calculateSharpeRatio(returns) << endl;
+    cout << "Sharpe Ratio: " << calculateSharpeRatio(returns, 2) << endl;
     cout << "Maximum Drawdown: " << calculateMaxDrawdown(stock) << "%" << endl;
-    cout << "Total Days: " << stock->getDataSize() << endl;
  }
  double Analytics::calculateMean(vector<double>& data){
     if(data.empty()) return 0;

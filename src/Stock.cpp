@@ -112,7 +112,7 @@ void Stock::displayRecentData(int day)
     int start = dates.size() - day;
 
     cout << "recent data (last " << day << "days): " << endl;
-    cout << "date \t\t Open \t\t High \t\t Low \t\t Close \t\t Volume" << endl;
+    cout << "  date \t\t\t Open \t\t High \t\t Low \t\t Close \t\t Volume" << endl;
     cout << "---------------------------------------------------------------------------------------------------" << endl;
     for (int i = start; i < dates.size(); i++)
     {
