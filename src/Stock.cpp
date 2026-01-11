@@ -75,20 +75,22 @@ string Stock::getName()
 {
     return name;
 }
-int Stock::getDataSize(){
+int Stock::getDataSize()
+{
     return dates.size();
 }
 
-double Stock::getClosePrice(int index){
-    if(index>=0 && index<closePrices.size())
+double Stock::getClosePrice(int index)
+{
+    if (index >= 0 && index < closePrices.size())
         return closePrices[index];
     return 0;
 }
 
-vector<double> Stock::getAllClosePrices(){
+vector<double> Stock::getAllClosePrices()
+{
     return closePrices;
 }
-
 
 void Stock::displaySummary()
 {
@@ -125,7 +127,8 @@ void Stock::displayRecentData(int day)
     }
 }
 
-void Stock::calculateSMA(int period){ // simple moving average
+void Stock::calculateSMA(int period)
+{ // simple moving average
     vector<double> *vec;
 
     // decide which vector to work on
@@ -158,8 +161,9 @@ void Stock::calculateSMA(int period){ // simple moving average
     }
 }
 
-void Stock::calculateAllIndicators(){
-    //this is called d
+void Stock::calculateAllIndicators()
+{
+    // this is called d
     cout << "Calculating indicators of " << name << " company ...." << endl;
     calculateSMA(20);
     calculateSMA(50);
@@ -173,7 +177,8 @@ void Stock::calculateAllIndicators(){
     cout << " DONE!!! all indicators calculated" << endl;
 }
 
-void Stock::calculateEMA(int period){ // exponential moving average
+void Stock::calculateEMA(int period)
+{ // exponential moving average
     vector<double> *vec;
     if (period == 12)
         vec = &ema12;
@@ -206,7 +211,8 @@ void Stock::calculateEMA(int period){ // exponential moving average
     }
 }
 
-void Stock::calculateMACD(){
+void Stock::calculateMACD()
+{
     macd.clear();
     macdSignal.clear();
     macdHistogram.clear();
@@ -224,7 +230,6 @@ void Stock::calculateMACD(){
             macd.push_back(val);
         }
     }
-    
 
     // calculate signal line = 9-day ema of macd
     double multiplier = 2.0 / (9 + 1);
@@ -244,7 +249,7 @@ void Stock::calculateMACD(){
             }
             macdSignal.push_back(sum / 9);
         }
-        else    // rest of the days
+        else // rest of the days
         {
             double signal = (macd[i] * multiplier) + (macdSignal[i - 1] * (1 - multiplier));
             macdSignal.push_back(signal);
@@ -265,7 +270,8 @@ void Stock::calculateMACD(){
     }
 }
 
-void Stock::calculateBoillingerBands(int period, double n){
+void Stock::calculateBoillingerBands(int period, double n)
+{
     bollingerLower.clear();
     bollingerMiddle.clear();
     bollingerUpper.clear();
@@ -301,7 +307,8 @@ void Stock::calculateBoillingerBands(int period, double n){
     }
 }
 
-void Stock::calculateMomentum(int period){
+void Stock::calculateMomentum(int period)
+{
     momentum.clear();
 
     for (int i = 0; i < period; i++)
@@ -317,7 +324,7 @@ void Stock::calculateMomentum(int period){
     }
 }
 
-void Stock::calculateRSI(int period)    // relative strength index, 
+void Stock::calculateRSI(int period) // relative strength index,
 {
     rsi.clear();
     if (closePrices.size() < period + 1)
@@ -329,7 +336,7 @@ void Stock::calculateRSI(int period)    // relative strength index,
     // rs=gains/losses of period time
     vector<double> gains;
     vector<double> losses;
-    for (int i = 1; i < closePrices.size(); i++)    //calculate all gains, losses
+    for (int i = 1; i < closePrices.size(); i++) // calculate all gains, losses
     {
         double change = closePrices[i] - closePrices[i - 1];
         if (change > 0)
@@ -346,10 +353,10 @@ void Stock::calculateRSI(int period)    // relative strength index,
 
     // now RSI = 100 - 100/(1+rs)
 
-    double gainSum = 0.0, avgGain, avgLoss,rs,rsiVal;
+    double gainSum = 0.0, avgGain, avgLoss, rs, rsiVal;
     double lossSum = 0.0;
-   
-    for (int i = 0; i < period-1; i++)  //first 13 days
+
+    for (int i = 0; i < period - 1; i++) // first 13 days
     {
         gainSum += gains[i];
         lossSum += losses[i];
@@ -359,41 +366,40 @@ void Stock::calculateRSI(int period)    // relative strength index,
 
     // day 14
     {
-        gainSum += gains[period -1];
-        lossSum += losses[period -1];
-        avgGain = gainSum/period;
-        avgLoss = lossSum/period;
-        if(avgLoss == 0.0)
+        gainSum += gains[period - 1];
+        lossSum += losses[period - 1];
+        avgGain = gainSum / period;
+        avgLoss = lossSum / period;
+        if (avgLoss == 0.0)
             rsi.push_back(100);
-        else{
-            rs=avgGain/avgLoss;
-            rsiVal=100 - (100/(1.0+rs));
+        else
+        {
+            rs = avgGain / avgLoss;
+            rsiVal = 100 - (100 / (1.0 + rs));
             rsi.push_back(rsiVal);
         }
     }
-    // rest of the days 
-    for(int i = period ;i<gains.size(); i++){
-        
+    // rest of the days
+    for (int i = period; i < gains.size(); i++)
+    {
+
         // Wilder's smoothing method
         avgGain = ((avgGain * (period - 1)) + gains[i]) / period;
         avgLoss = ((avgLoss * (period - 1)) + losses[i]) / period;
 
-        if(avgLoss == 0.0)
+        if (avgLoss == 0.0)
             rsi.push_back(100);
-        else{
-            rs=avgGain/avgLoss;
-            rsiVal=100 - (100/(1.0+rs));
+        else
+        {
+            rs = avgGain / avgLoss;
+            rsiVal = 100 - (100 / (1.0 + rs));
             rsi.push_back(rsiVal);
         }
-
     }
-
 }
 
-
-
-
-double Stock::getSMA20(int index){
+double Stock::getSMA20(int index)
+{
     if (index >= 0 && index < sma20.size())
     {
         return sma20[index];
@@ -401,7 +407,8 @@ double Stock::getSMA20(int index){
     return 0.0;
 }
 
-double Stock::getSMA50(int index){
+double Stock::getSMA50(int index)
+{
     if (index >= 0 && index < sma50.size())
     {
         return sma50[index];
@@ -409,21 +416,24 @@ double Stock::getSMA50(int index){
     return 0.0;
 }
 
-double Stock::getMACD(int index){
+double Stock::getMACD(int index)
+{
     if (index >= 0 && index < macd.size())
     {
         return macd[index];
     }
     return 0.0;
 }
-double Stock::getMACDSignal(int index){
+double Stock::getMACDSignal(int index)
+{
     if (index >= 0 && index < macdSignal.size())
     {
         return macdSignal[index];
     }
     return 0.0;
 }
-double Stock::getMACDHistogram(int index){
+double Stock::getMACDHistogram(int index)
+{
     if (index >= 0 && index < macdHistogram.size())
     {
         return macdHistogram[index];
@@ -439,7 +449,8 @@ double Stock::getBollingerLower(int index)
     }
     return 0.0;
 }
-double Stock::getBollingerMiddle(int index){
+double Stock::getBollingerMiddle(int index)
+{
     if (index >= 0 && index < bollingerMiddle.size())
     {
         return bollingerMiddle[index];
@@ -464,12 +475,11 @@ double Stock::getMomentum(int index)
     return 0.0;
 }
 
-double Stock::getRSI(int index){
+double Stock::getRSI(int index)
+{
     if (index >= 0 && index < rsi.size())
     {
         return rsi[index];
     }
     return 0.0;
 }
-
-

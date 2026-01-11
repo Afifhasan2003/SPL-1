@@ -10,30 +10,35 @@
 #include <filesystem>
 #include <fstream>
 
-
 using namespace std;
 namespace fs = std::filesystem; // fs is an alias, to avoid writing std::filesystem every time
 
-bool loadStockIfNeeded(string symbol, map<string, Stock*>& stocks) {
-    if (stocks.find(symbol) != stocks.end()) {  //already loaded
+bool loadStockIfNeeded(string symbol, map<string, Stock *> &stocks)
+{
+    if (stocks.find(symbol) != stocks.end())
+    { // already loaded
         return true;
     }
-    
+
     string filename = "data/stocks/" + symbol + ".csv";
-    
-    if (!fs::exists(filename)) {
+
+    if (!fs::exists(filename))
+    {
         cout << "Error: " << symbol << " not found" << endl;
         return false;
     }
-    
+
     // Load the stock
-    Stock* newStock = new Stock(symbol, symbol);
-    
-    if (newStock->loadFromCSV(filename)) {
+    Stock *newStock = new Stock(symbol, symbol);
+
+    if (newStock->loadFromCSV(filename))
+    {
         stocks[symbol] = newStock;
         cout << symbol << " loaded successfully!" << endl;
         return true;
-    } else {
+    }
+    else
+    {
         cout << " Failed to load " << symbol << endl;
         delete newStock;
         return false;
@@ -80,80 +85,88 @@ void displaySelectedPortfolioMenu(string portfolioName)
     cout << "4. View holdings" << endl;
     cout << "5. View transactions" << endl;
     cout << "6. View summary" << endl;
-    cout << "7. View performance analytics "<<endl;
+    cout << "7. View performance analytics " << endl;
     cout << "8. Back" << endl;
     cout << "======================================" << endl;
     cout << "Enter choice: ";
 }
 
 void loadPortfolios(vector<Portfolio *> &portfolios)
-{    
-       cout << " Loading saved Portfolios ... ... " << endl;
-        try
+{
+    cout << " Loading saved Portfolios ... ... " << endl;
+    try
+    {
+        if (fs::exists("portfolios") && fs::is_directory("portfolios"))
         {
-            if (fs::exists("portfolios") && fs::is_directory("portfolios"))
+            for (auto &each : fs::directory_iterator("portfolios"))
             {
-                for (auto &each : fs::directory_iterator("portfolios"))
+                if (each.path().extension() == ".csv")
                 {
-                    if (each.path().extension() == ".csv")
+                    Portfolio *p = new Portfolio("");
+                    if (p->loadFromFile(each.path().string()))
                     {
-                        Portfolio *p = new Portfolio("");
-                        if (p->loadFromFile(each.path().string()))
-                        {
-                            portfolios.push_back(p);
-                            cout << " loaded- " << p->getName() << endl;
-                        }
-                        else
-                        {
-                            cout << "something went wrong with loading " << p->getName() << endl;
-                            delete p;
-                        }
+                        portfolios.push_back(p);
+                        cout << " loaded- " << p->getName() << endl;
+                    }
+                    else
+                    {
+                        cout << "something went wrong with loading " << p->getName() << endl;
+                        delete p;
                     }
                 }
             }
         }
-        catch (const std::exception &e)
-        {
-            cout << "No portfolios...";
-        }
+    }
+    catch (const std::exception &e)
+    {
+        cout << "No portfolios...";
+    }
 
-        if (portfolios.size() > 0)
-            cout << "\n Portfolios loaded successfully" << endl;
-    
+    if (portfolios.size() > 0)
+        cout << "\n Portfolios loaded successfully" << endl;
 }
 
-void loadStocksFromWatchlist(map<string, Stock*>& stocks){
-        // Auto-load stocks from watchlist
+void loadStocksFromWatchlist(map<string, Stock *> &stocks)
+{
+    // Auto-load stocks from watchlist
     cout << "\nLoading watchlist stocks..." << endl;
     ifstream watchlistFile("watchList.txt");
-    
-    if (watchlistFile.is_open()) {
+
+    if (watchlistFile.is_open())
+    {
         string symbol;
         int loadedCount = 0;
-        
-        while (getline(watchlistFile, symbol)) {
+
+        while (getline(watchlistFile, symbol))
+        {
             // Trim whitespace
             symbol.erase(0, symbol.find_first_not_of(" \t\r\n"));
             symbol.erase(symbol.find_last_not_of(" \t\r\n") + 1);
-            
-            if (symbol.empty()) continue;
-            
-            if (loadStockIfNeeded(symbol, stocks)) {
+
+            if (symbol.empty())
+                continue;
+
+            if (loadStockIfNeeded(symbol, stocks))
+            {
                 loadedCount++;
             }
         }
-        
+
         watchlistFile.close();
-        
-        if (loadedCount > 0) {
+
+        if (loadedCount > 0)
+        {
             cout << "\n✓ " << loadedCount << " stock(s) loaded from watchlist!" << endl;
         }
-    } else {
+    }
+    else
+    {
         cout << "Note: No watchlist.txt found. You can create one with stock symbols (one per line)." << endl;
     }
 }
 
-pair<int,int> getDateRange(Stock* stock){
+pair<int, int> getDateRange(Stock *stock)
+{
     int dataSize = stock->getDataSize();
 
     cout << "\n=== Select Time Period ===" << endl;
@@ -164,58 +177,68 @@ pair<int,int> getDateRange(Stock* stock){
     cout << "5. All time" << endl;
     cout << "6. Custom range" << endl;
     cout << "Enter choice: ";
-    
+
     int choice;
     cin >> choice;
-    
+
     int startDay = 0;
     int endDay = dataSize - 1;
-    
-    if (choice == 1) {
+
+    if (choice == 1)
+    {
         startDay = max(0, endDay - 30);
-    } else if (choice == 2) {
+    }
+    else if (choice == 2)
+    {
         startDay = max(0, endDay - 90);
-    } else if (choice == 3) {
+    }
+    else if (choice == 3)
+    {
         startDay = max(0, endDay - 180);
-    } else if (choice == 4) {
+    }
+    else if (choice == 4)
+    {
         startDay = max(0, endDay - 365);
-    } else if (choice == 5) {
+    }
+    else if (choice == 5)
+    {
         startDay = 0;
-    } else if (choice == 6) {
+    }
+    else if (choice == 6)
+    {
         cout << "Enter start day (0 to " << endDay << "): ";
         cin >> startDay;
         cout << "Enter end day (" << startDay << " to " << endDay << "): ";
         cin >> endDay;
-        
-        
-        if (startDay < 0) startDay = 0;
-        if (endDay >= dataSize) endDay = dataSize - 1;
-        if (startDay > endDay) startDay = endDay;
-    } else {
+
+        if (startDay < 0)
+            startDay = 0;
+        if (endDay >= dataSize)
+            endDay = dataSize - 1;
+        if (startDay > endDay)
+            startDay = endDay;
+    }
+    else
+    {
         cout << "Invalid choice. Using all time." << endl;
     }
-    
+
     // int numDays = endDay - startDay + 1;
     // cout << " Analyzing " << numDays << " days of data" << endl;
-    
-    return make_pair(startDay, endDay);    
+
+    return make_pair(startDay, endDay);
 }
-
-
-
-
 
 int main()
 {
     map<string, Stock *> stocks;    // symbol -> Stock object
     vector<Portfolio *> portfolios; // All portfolios
 
-    cout << "\n*** Welcome to QuantLab ***\n"<< endl;
+    cout << "\n*** Welcome to QuantLab ***\n"
+         << endl;
 
     loadPortfolios(portfolios);
     loadStocksFromWatchlist(stocks);
-
-    
 
     while (true)
     {
@@ -302,8 +325,9 @@ int main()
                             currentPortfolio->addCash(amount);
 
                             string filename = "portfolios/" + currentPortfolio->getName() + ".csv";
-                            for(char& c:filename)
-                                if(c==' ') c='_';
+                            for (char &c : filename)
+                                if (c == ' ')
+                                    c = '_';
 
                             currentPortfolio->saveToFile(filename); // portfolio was already created
                         }
@@ -316,7 +340,8 @@ int main()
                             cout << "Enter stock symbol: ";
                             cin >> symbol;
 
-                            if (!loadStockIfNeeded(symbol, stocks)) {
+                            if (!loadStockIfNeeded(symbol, stocks))
+                            {
                                 cout << "Cannot buy " << symbol << ". Stock not available." << endl;
                                 continue;
                             }
@@ -332,8 +357,9 @@ int main()
                             currentPortfolio->buyStock(symbol, quantity, price, "unknown date");
 
                             string filename = "portfolios/" + currentPortfolio->getName() + ".csv";
-                            for(char& c:filename)
-                                if(c==' ') c='_';
+                            for (char &c : filename)
+                                if (c == ' ')
+                                    c = '_';
 
                             currentPortfolio->saveToFile(filename);
                         }
@@ -356,8 +382,9 @@ int main()
                             currentPortfolio->sellStock(symbol, quantity, price, "unknown date");
 
                             string filename = "portfolios/" + currentPortfolio->getName() + ".csv";
-                            for(char& c:filename)
-                                if(c==' ') c='_';
+                            for (char &c : filename)
+                                if (c == ' ')
+                                    c = '_';
 
                             currentPortfolio->saveToFile(filename);
                         }
@@ -365,17 +392,18 @@ int main()
                             currentPortfolio->displayHoldings();
                         else if (action == 5)
                             currentPortfolio->displayTransactions();
-                        else if (action == 6){
-                            if(stocks.empty()) 
-                                cout<<"\tno stocks loaded yeetttt"<<endl;
+                        else if (action == 6)
+                        {
+                            if (stocks.empty())
+                                cout << "\tno stocks loaded yeetttt" << endl;
                             currentPortfolio->displaySummary(stocks);
                         }
-                        else if(action == 7){
-                            if(stocks.empty())
-                                cout<<"worning! no stocks loaded yet";
+                        else if (action == 7)
+                        {
+                            if (stocks.empty())
+                                cout << "worning! no stocks loaded yet";
 
                             currentPortfolio->displayPerformanceAnalytics(stocks);
-                            
                         }
                         else if (action == 8)
                             break;
@@ -694,15 +722,17 @@ int main()
                 cin >> sym;
 
                 if (stocks.find(sym) != stocks.end())
-                    {pair dateRAnge = getDateRange(stocks[sym]);
+                {
+                    pair dateRAnge = getDateRange(stocks[sym]);
                     int st = dateRAnge.first, end = dateRAnge.second;
-                    Analytics::displayAnalyticsReport(stocks[sym],st,end );}
+                    Analytics::displayAnalyticsReport(stocks[sym], st, end);
+                }
                 else
                     cout << "Stock not found" << endl;
             }
         }
         else if (choice == 6) // Backtesting Strategy
-        { 
+        {
             if (stocks.empty())
             {
                 cout << "\nNo Stocks loaded yet" << endl;
@@ -714,6 +744,7 @@ int main()
                 {
                     cout << "- " << pair.first << endl;
                 }
+
                 string symbol;
                 cout << "Enter symbol: ";
                 cin >> symbol;
@@ -740,6 +771,8 @@ int main()
                     cout << "Enter initial Cash: $";
                     cin >> giveCash;
 
+                    pair range = getDateRange(stocks[symbol]);
+
                     if (stratChoice != 6)
                     { // single strategy
                         Strategy *strategy = nullptr;
@@ -765,7 +798,7 @@ int main()
                         }
 
                         // run backtester
-                        Backtester backtester(stocks[symbol], strategy, giveCash);
+                        Backtester backtester(stocks[symbol], strategy, giveCash, range.first, range.second);
                         backtester.run();
                         backtester.displayResult();
 
@@ -785,7 +818,7 @@ int main()
 
                         for (int i = 0; i < 5; i++) // returns of each strategy
                         {
-                            Backtester backtester(stocks[symbol], strategy[i], giveCash);
+                            Backtester backtester(stocks[symbol], strategy[i], giveCash, range.first, range.second);
                             backtester.run();
                             returns.push_back(backtester.getTotalReturn());
                             names.push_back(strategy[i]->getName());

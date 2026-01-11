@@ -7,8 +7,8 @@
 
 using namespace std;
 
-//a constructor without an argument is by default provided by the compiler in C++, unlike Java
-// constructor
+// a constructor without an argument is by default provided by the compiler in C++, unlike Java
+//  constructor
 Portfolio::Portfolio(string portfolioName)
 {
     name = portfolioName;
@@ -83,367 +83,410 @@ void Portfolio::addCash(double amount)
     cout << "Successfully added " << amount << "tk on portfolio" << endl;
 }
 
-void Portfolio::displayHoldings(){
+void Portfolio::displayHoldings()
+{
 
-    if(holdings.empty()){
-        cout<<"You have no holdings in this portfolio";
+    if (holdings.empty())
+    {
+        cout << "You have no holdings in this portfolio";
         return;
     }
 
-    cout<<"\nHoldings in "<<name<< " portfolio"<<">>>"<<endl;
-    cout<<"Symbol\t Quantity \t averageCost \t Total"<<endl;
-    for(auto& pair:holdings){
-        Holding& h = pair.second;
-        cout<<h.symbol<<"\t"
-            <<h.quantity<<"\t"
-            <<"$"<<h.avgCost<<"\t"
-            <<"$"<<h.avgCost*h.quantity
-            <<endl;
+    cout << "\nHoldings in " << name << " portfolio" << ">>>" << endl;
+    cout << "Symbol\t Quantity \t averageCost \t Total" << endl;
+    for (auto &pair : holdings)
+    {
+        Holding &h = pair.second;
+        cout << h.symbol << "\t"
+             << h.quantity << "\t"
+             << "$" << h.avgCost << "\t"
+             << "$" << h.avgCost * h.quantity
+             << endl;
     }
 }
-void Portfolio::displayTransactions(){
-    if(!transactions.size()>0)
-        cout<<"No transaction has been done yet"<<endl;
-    
-    else{
-        cout<<"Transactions are--"<<endl;
+void Portfolio::displayTransactions()
+{
+    if (!transactions.size() > 0)
+        cout << "No transaction has been done yet" << endl;
+
+    else
+    {
+        cout << "Transactions are--" << endl;
         for (int i = 0; i < transactions.size(); i++)
         {
-            cout<<i+1<<"."<<transactions[i]<<endl;        }
-        
+            cout << i + 1 << "." << transactions[i] << endl;
+        }
     }
 }
-void Portfolio::displaySummary(map<string, Stock *> &stockData){
+void Portfolio::displaySummary(map<string, Stock *> &stockData)
+{
 
     cout << "\n=== Portfolio Summary: '" << name << "' ===" << endl;
-    
-    if (holdings.empty()) {
+
+    if (holdings.empty())
+    {
         cout << "No holdings yet." << endl;
         cout << "Cash Balance: $" << fixed << setprecision(2) << cashBalance << endl;
         return;
     }
-    
+
     cout << fixed << setprecision(2);
     cout << "\nSymbol\tQty\tAvg Cost\tCurrent\t\tProfit/Loss" << endl;
     cout << "------------------------------------------------------------" << endl;
 
     double totalValue = 0.0;
     double totalCost = 0.0;
-    
-    for (const auto& pair : holdings) {
-        const Holding& h = pair.second;
+
+    for (const auto &pair : holdings)
+    {
+        const Holding &h = pair.second;
         double costBasis = h.quantity * h.avgCost;
         totalCost += costBasis;
-        
+
         // Get current price if stock data available
-        if (stockData.find(h.symbol) != stockData.end()) {
-            Stock* stock = stockData.at(h.symbol);
+        if (stockData.find(h.symbol) != stockData.end())
+        {
+            Stock *stock = stockData.at(h.symbol);
             int lastIndex = stock->getDataSize() - 1;
             double currentPrice = stock->getClosePrice(lastIndex);
             double currentValue = h.quantity * currentPrice;
             double profitLoss = currentValue - costBasis;
             double profitLossPct = (profitLoss / costBasis) * 100.0;
-            
+
             totalValue += currentValue;
-            
-            cout << h.symbol << "\t" << h.quantity << "\t$" << h.avgCost 
+
+            cout << h.symbol << "\t" << h.quantity << "\t$" << h.avgCost
                  << "\t\t$" << currentPrice << "\t\t";
-            
-            if (profitLoss >= 0) {
+
+            if (profitLoss >= 0)
+            {
                 cout << "+$" << profitLoss << " (+" << profitLossPct << "%)";
-            } else {
+            }
+            else
+            {
                 cout << "-$" << abs(profitLoss) << " (" << profitLossPct << "%)";
             }
             cout << endl;
-        } else {
-            cout << h.symbol << "\t" << h.quantity << "\t$" << h.avgCost 
+        }
+        else
+        {
+            cout << h.symbol << "\t" << h.quantity << "\t$" << h.avgCost
                  << "\t\tN/A\t\tN/A (Load stock data)" << endl;
-            totalValue += costBasis;  // Use cost basis if no current price
+            totalValue += costBasis; // Use cost basis if no current price
         }
     }
-    
+
     cout << "\n-----------------------------------------------------------" << endl;
     cout << "Total Cost Basis: $" << totalCost << endl;
     cout << "Current Holdings Value: $" << totalValue << endl;
     cout << "Cash Balance: $" << cashBalance << endl;
     cout << "Total Portfolio Value: $" << (totalValue + cashBalance) << endl;
-    
+
     double totalProfitLoss = (totalValue + cashBalance) - (totalCost + cashBalance);
     double totalProfitLossPct = (totalProfitLoss / totalCost) * 100.0;
-    
+
     cout << "Total Profit/Loss: ";
-    if (totalProfitLoss >= 0) {
+    if (totalProfitLoss >= 0)
+    {
         cout << "+$" << totalProfitLoss << " (+" << totalProfitLossPct << "%)";
-    } else {
+    }
+    else
+    {
         cout << "-$" << abs(totalProfitLoss) << " (" << totalProfitLossPct << "%)";
     }
     cout << endl;
-
-
 }
 
-
-void Portfolio::displayDetailedSummary( map<string, Stock*>& stockData)  {
+void Portfolio::displayDetailedSummary(map<string, Stock *> &stockData)
+{
     displaySummary(stockData);
-    
-    if (holdings.empty() || stockData.empty()) return;
-    
+
+    if (holdings.empty() || stockData.empty())
+        return;
+
     cout << "\n=== Holdings Breakdown ===" << endl;
-    
+
     double totalValue = cashBalance;
-    for (auto& pair : holdings) {
-        Holding& h = pair.second;
-        if (stockData.find(h.symbol) != stockData.end()) {
-            Stock* stock = stockData.at(h.symbol);
+    for (auto &pair : holdings)
+    {
+        Holding &h = pair.second;
+        if (stockData.find(h.symbol) != stockData.end())
+        {
+            Stock *stock = stockData.at(h.symbol);
             int lastIndex = stock->getDataSize() - 1;
             double currentPrice = stock->getClosePrice(lastIndex);
             totalValue += h.quantity * currentPrice;
-        } else {
+        }
+        else
+        {
             totalValue += h.quantity * h.avgCost;
         }
     }
-    
-    //how much percentage of each holding (stock) in the portfolio
-    for (auto& pair : holdings) {
-        Holding& h = pair.second;
+
+    // how much percentage of each holding (stock) in the portfolio
+    for (auto &pair : holdings)
+    {
+        Holding &h = pair.second;
         double holdingValue = h.quantity * h.avgCost;
-        
-        if (stockData.find(h.symbol) != stockData.end()) {
-            Stock* stock = stockData.at(h.symbol);
+
+        if (stockData.find(h.symbol) != stockData.end())
+        {
+            Stock *stock = stockData.at(h.symbol);
             int lastIndex = stock->getDataSize() - 1;
             double currentPrice = stock->getClosePrice(lastIndex);
             holdingValue = h.quantity * currentPrice;
         }
-        
+
         double allocation = (holdingValue / totalValue) * 100.0;
-        
+
         cout << h.symbol << ": " << allocation << "% of portfolio" << endl;
     }
-    
+
     double cashAllocation = (cashBalance / totalValue) * 100.0;
     cout << "Cash: " << cashAllocation << "% of portfolio" << endl;
 }
 
-
-void Portfolio::displayPerformanceAnalytics(map<string, Stock*>& stockData){
-        if (holdings.empty()) {
+void Portfolio::displayPerformanceAnalytics(map<string, Stock *> &stockData)
+{
+    if (holdings.empty())
+    {
         cout << "\nNo holdings to analyze." << endl;
         return;
     }
-    
+
     // Calculate total cost basis and current value
     double totalCost = 0.0;
-    double currentValue = 0.0;   //of the portfolio
+    double currentValue = 0.0; // of the portfolio
     bool hasMissingData = false;
-    
-    for (auto& pair : holdings) {
-        Holding& h = pair.second;
+
+    for (auto &pair : holdings)
+    {
+        Holding &h = pair.second;
         double costBasis = h.quantity * h.avgCost;
         totalCost += costBasis;
-        
-        if (stockData.find(h.symbol) != stockData.end()) {
-            Stock* stock = stockData.at(h.symbol);
+
+        if (stockData.find(h.symbol) != stockData.end())
+        {
+            Stock *stock = stockData.at(h.symbol);
             int lastIndex = stock->getDataSize() - 1;
             double currentPrice = stock->getClosePrice(lastIndex);
             currentValue += h.quantity * currentPrice;
-        } else {
+        }
+        else
+        {
             currentValue += costBasis;
             hasMissingData = true;
         }
     }
-    
+
     cout << "\n=== Portfolio Performance Analytics ===" << endl;
     cout << "Portfolio: " << name << endl;
     cout << "---------------------------------------" << endl;
     cout << fixed << setprecision(2);
-    
+
     // Total return
     double totalReturn = ((currentValue - totalCost) / totalCost) * 100.0;
     cout << "\nReturn Metrics:" << endl;
     cout << "  Initial Investment: $" << totalCost << endl;
     cout << "  Current Value: $" << currentValue << endl;
     cout << "  Total Return: ";
-    if (totalReturn >= 0) {
+    if (totalReturn >= 0)
+    {
         cout << "+" << totalReturn << "%";
-    } else {
+    }
+    else
+    {
         cout << totalReturn << "%";
     }
     cout << endl;
-    
+
     // Calculate portfolio volatility (weighted average)
-    if (!hasMissingData && !holdings.empty()) {
+    if (!hasMissingData && !holdings.empty())
+    {
         double weightedVolatility = 0.0;
-        
-        for (const auto& pair : holdings) {
-            const Holding& h = pair.second;
-            if (stockData.find(h.symbol) != stockData.end()) {
-                Stock* stock = stockData.at(h.symbol);
-                
+
+        for (const auto &pair : holdings)
+        {
+            const Holding &h = pair.second;
+            if (stockData.find(h.symbol) != stockData.end())
+            {
+                Stock *stock = stockData.at(h.symbol);
+
                 // Calculate stock's contribution to portfolio value
                 int lastIndex = stock->getDataSize() - 1;
                 double currentPrice = stock->getClosePrice(lastIndex);
                 double stockValue = h.quantity * currentPrice;
                 double weight = stockValue / currentValue;
-                
+
                 // Get stock's daily returns
                 vector<double> returns;
-                for (int i = 1; i < stock->getDataSize(); i++) {
+                for (int i = 1; i < stock->getDataSize(); i++)
+                {
                     double today = stock->getClosePrice(i);
                     double yesterday = stock->getClosePrice(i - 1);
-                    if (yesterday != 0) {
+                    if (yesterday != 0)
+                    {
                         double ret = ((today - yesterday) / yesterday) * 100.0;
                         returns.push_back(ret);
                     }
                 }
-                
+
                 // Calculate volatility from returns
-                if (returns.size() > 1) {
+                if (returns.size() > 1)
+                {
                     double mean = 0.0;
-                    for (double r : returns) mean += r;
+                    for (double r : returns)
+                        mean += r;
                     mean /= returns.size();
-                    
+
                     double variance = 0.0;
-                    for (double r : returns) {
+                    for (double r : returns)
+                    {
                         double diff = r - mean;
                         variance += diff * diff;
                     }
                     variance /= returns.size();
                     double stdDev = sqrt(variance);
                     double annualizedVol = stdDev * sqrt(252);
-                    
+
                     // Add weighted contribution
                     weightedVolatility += weight * annualizedVol;
                 }
             }
         }
-        
+
         cout << "\nRisk Metrics:" << endl;
         cout << "  Portfolio Volatility: " << weightedVolatility << "%" << endl;
-        
+
         // Sharpe Ratio (assuming 2% risk-free rate)
         double riskFreeRate = 2.0;
-        if (weightedVolatility > 0) {
+        if (weightedVolatility > 0)
+        {
             double sharpeRatio = (totalReturn - riskFreeRate) / weightedVolatility;
             cout << "  Sharpe Ratio: " << sharpeRatio << endl;
         }
     }
-    
+
     // Diversification
     cout << "\nDiversification:" << endl;
     cout << "  Number of Holdings: " << holdings.size() << endl;
-    
-    if (hasMissingData) {
+
+    if (hasMissingData)
+    {
         cout << "\n⚠ Note: Some stocks not loaded. Load all holdings for complete analytics." << endl;
     }
-    
+
     cout << "=======================================" << endl;
-
-
 }
 
-bool Portfolio::hasStock(string symbol){
+bool Portfolio::hasStock(string symbol)
+{
     return holdings.find(symbol) != holdings.end();
 }
 
-int Portfolio::getQuanity(string symbol){
-    if(hasStock(symbol))
+int Portfolio::getQuanity(string symbol)
+{
+    if (hasStock(symbol))
         return holdings.at(symbol).quantity;
-    
-    return 0;
-}   
 
-bool Portfolio::saveToFile(string filename){
-    ofstream file(filename);    //output file stream, to write to a file
-    if(!file.is_open()){
-        cout<<"could not save to "<<filename<<endl;
+    return 0;
+}
+
+bool Portfolio::saveToFile(string filename)
+{
+    ofstream file(filename); // output file stream, to write to a file
+    if (!file.is_open())
+    {
+        cout << "could not save to " << filename << endl;
         return false;
     }
-    file<< "Portfolio_name:"<<name<<endl;
-    file<< "Cash:"<<cashBalance<<endl;
+    file << "Portfolio_name:" << name << endl;
+    file << "Cash:" << cashBalance << endl;
 
-    file<< "Holdings:"<<endl;
-    for(auto pair: holdings){
-        Holding &h=pair.second;
-        file<<h.symbol<<","<<h.quantity<<","<<h.avgCost<<","<<h.purchaseDate<<endl;
+    file << "Holdings:" << endl;
+    for (auto pair : holdings)
+    {
+        Holding &h = pair.second;
+        file << h.symbol << "," << h.quantity << "," << h.avgCost << "," << h.purchaseDate << endl;
     }
 
-    file<<"Transactions:"<<endl;
-    for(auto &trans:transactions)       //transactions is vector of strings
-        file<<trans<<endl;
+    file << "Transactions:" << endl;
+    for (auto &trans : transactions) // transactions is vector of strings
+        file << trans << endl;
 
     file.close();
     return true;
 }
-bool Portfolio::loadFromFile(string filename){
-    
+bool Portfolio::loadFromFile(string filename)
+{
+
     ifstream file(filename);
 
     if (!file.is_open())
     {
-        cout<<"could not load from "<<filename<<endl;
+        cout << "could not load from " << filename << endl;
         return false;
     }
 
-    string line, section="";
+    string line, section = "";
 
-    while (getline(file,line))
-    {  
+    while (getline(file, line))
+    {
         if (line.empty())
             continue;
-        
-        else if (line=="Holdings:")
+
+        else if (line == "Holdings:")
         {
-            section="holding"; 
+            section = "holding";
             continue;
         }
-        else if(line=="Transactions:"){
+        else if (line == "Transactions:")
+        {
             section = "tran";
             continue;
         }
-        
 
-        //now
-        if(section==""){     //name or cash
-            size_t pos= line.find(':');         // find returns size_t type(unsigned numer)
-            if(pos != string::npos)     //npos is the biggest number in size_t
+        // now
+        if (section == "")
+        {                                // name or cash
+            size_t pos = line.find(':'); // find returns size_t type(unsigned numer)
+            if (pos != string::npos)     // npos is the biggest number in size_t
             {
-                string detail = line.substr(0,pos);
-                string val = line.substr(pos+1);  //till end
+                string detail = line.substr(0, pos);
+                string val = line.substr(pos + 1); // till end
 
-                if(detail == "Portfolio_name" )
+                if (detail == "Portfolio_name")
                     name = val;
-                else if(detail == "Cash")
+                else if (detail == "Cash")
                     cashBalance = stod(val);
             }
         }
-        else if (section == "holding")  
+        else if (section == "holding")
         {
-        // each line has symbol,quantity,avgCost,date
-        stringstream ss(line);
-        string symbol,quantityStr,avgCostStr,dateStr;
+            // each line has symbol,quantity,avgCost,date
+            stringstream ss(line);
+            string symbol, quantityStr, avgCostStr, dateStr;
 
-        getline(ss, symbol, ',');
-        getline(ss, quantityStr, ',');
-        getline(ss, avgCostStr, ',');
-        getline(ss, dateStr, ',');
+            getline(ss, symbol, ',');
+            getline(ss, quantityStr, ',');
+            getline(ss, avgCostStr, ',');
+            getline(ss, dateStr, ',');
 
-        //now create an instance and save in map
-        Holding h;
-        h.symbol = symbol;
-        h.quantity =  stoi(quantityStr);
-        h.avgCost = stod(avgCostStr);
-        h.purchaseDate = dateStr;
+            // now create an instance and save in map
+            Holding h;
+            h.symbol = symbol;
+            h.quantity = stoi(quantityStr);
+            h.avgCost = stod(avgCostStr);
+            h.purchaseDate = dateStr;
 
-        holdings[symbol] = h;
- 
+            holdings[symbol] = h;
         }
-        else if (section== "tran")
+        else if (section == "tran")
         {
             transactions.push_back(line);
         }
-        
     }
-    
+
     file.close();
     return true;
 }

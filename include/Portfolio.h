@@ -1,12 +1,11 @@
 #ifndef PORTFOLIO_H
 #define PORTFOLIO_H
 
-#include<iostream>
-#include<string>
-#include<map>
-#include<vector>
-#include"Stock.h"
-
+#include <iostream>
+#include <string>
+#include <map>
+#include <vector>
+#include "Stock.h"
 
 using namespace std;
 
@@ -18,17 +17,18 @@ struct Holding
     string purchaseDate;
 };
 
-class Portfolio{
+class Portfolio
+{
 private:
     string name;
-    map<string,Holding> holdings;    //symbol ->holding
+    map<string, Holding> holdings; // symbol ->holding
     vector<string> transactions;
     double cashBalance;
 
 public:
-    Portfolio(string portfolioName);    //constructor
+    Portfolio(string portfolioName); // constructor
 
-    void buyStock(string symbol, int quantity,double price, string date);
+    void buyStock(string symbol, int quantity, double price, string date);
     void sellStock(string symbol, int quantity, double price, string date);
 
     string getName();
@@ -37,11 +37,9 @@ public:
 
     void displayHoldings();
     void displayTransactions();
-    void displaySummary(map<string,Stock*>& stockData);
-    void displayDetailedSummary(map<string,Stock*>& stockData );
-    void displayPerformanceAnalytics(map<string, Stock*>& stockData);
-
-
+    void displaySummary(map<string, Stock *> &stockData);
+    void displayDetailedSummary(map<string, Stock *> &stockData);
+    void displayPerformanceAnalytics(map<string, Stock *> &stockData);
 
     bool hasStock(string symbol);
     int getQuanity(string symbol);
@@ -49,6 +47,5 @@ public:
     bool saveToFile(string filename);
     bool loadFromFile(string filename);
 };
-
 
 #endif
