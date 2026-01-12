@@ -81,3 +81,18 @@ pair<int, int> UIHelpers::getDateRange(Stock* stock) {
     
     return make_pair(startDay, endDay);
 }
+
+void UIHelpers::clearScreen() {
+    #ifdef _WIN32       
+        system("cls");
+    #else
+        system("clear");
+    #endif
+}
+
+
+void UIHelpers::pauseScreen() {
+    cout << "\nPress Enter to continue...";
+    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+    cin.get();
+}

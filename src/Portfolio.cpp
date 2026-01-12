@@ -4,6 +4,8 @@
 #include <sstream>
 #include <iomanip>
 #include <cmath>
+#include "../include/UIHelpers.h"
+
 
 using namespace std;
 
@@ -106,9 +108,10 @@ void Portfolio::displayHoldings()
 }
 void Portfolio::displayTransactions()
 {
-    if (!transactions.size() > 0)
+    if (!transactions.size() > 0){
         cout << "No transaction has been done yet" << endl;
-
+        UIHelpers::pauseScreen();
+    }
     else
     {
         cout << "Transactions are--" << endl;

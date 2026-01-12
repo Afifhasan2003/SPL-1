@@ -13,6 +13,9 @@ public:
     
     // Get date range from user
     static std::pair<int, int> getDateRange(Stock* stock);
+
+    static void clearScreen();
+    static void pauseScreen();
 };
 
 #endif
