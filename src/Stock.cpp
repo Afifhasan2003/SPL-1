@@ -164,7 +164,7 @@ void Stock::calculateSMA(int period)
 void Stock::calculateAllIndicators()
 {
     // this is called d
-    cout << "Calculating indicators of " << name << " company ...." << endl;
+    // cout << "Calculating indicators of " << name << " company ...." << endl;
     calculateSMA(20);
     calculateSMA(50);
     calculateEMA(12);
@@ -174,7 +174,7 @@ void Stock::calculateAllIndicators()
     calculateMomentum(10);
     calculateRSI(14);
 
-    cout << " DONE!!! all indicators calculated" << endl;
+    // cout << " DONE!!! all indicators calculated" << endl;
 }
 
 void Stock::calculateEMA(int period)
@@ -326,6 +326,8 @@ void Stock::calculateMomentum(int period)
 
 void Stock::calculateRSI(int period) // relative strength index,
 {
+    //if rsi is above 70, stock is overbought; below 30, oversold
+
     rsi.clear();
     if (closePrices.size() < period + 1)
     {

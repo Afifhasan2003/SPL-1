@@ -20,12 +20,12 @@ bool UIHelpers::loadStockIfNeeded(string symbol, map<string, Stock*>& stocks) {
     }
     
     // Load the stock
-    cout << "Loading " << symbol << "..." << endl;
+    // cout << "Loading " << symbol << "..." << endl;
     Stock* newStock = new Stock(symbol, symbol);
     
     if (newStock->loadFromCSV(filename)) {
         stocks[symbol] = newStock;
-        cout << "✓ " << symbol << " loaded successfully!" << endl;
+        cout << symbol << " loaded successfully!" << endl;
         return true;
     } else {
         cout << "✗ Failed to load " << symbol << endl;

@@ -99,8 +99,8 @@ void Portfolio::displayHoldings()
     for (auto &pair : holdings)
     {
         Holding &h = pair.second;
-        cout << h.symbol << "\t"
-             << h.quantity << "\t"
+        cout << h.symbol << "\t\t"
+             << h.quantity << "\t\t"
              << "$" << h.avgCost << "\t"
              << "$" << h.avgCost * h.quantity
              << endl;

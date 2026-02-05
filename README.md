@@ -21,18 +21,12 @@ A C++ application for managing investment portfolios and analyzing stock perform
 - **Storage**: File-based (CSV for stock data)
 - **Interface**: Console/Terminal
 
-## Timeline
 
-- **Phase 1** (Weeks 1-8): Core system and portfolio management
-- **Phase 2** (Weeks 9-14): Analytics and backtesting
-- **Phase 3** (Weeks 15-18): Predictive models and recommendations
 
+## indicator vs analytics
+indicators are like signals, of when to buy or sell. ... analytics are more like how the stock or portfolio is performing
 
 
 ## How to Run
 g++ -std=c++17 main.cpp src/Stock.cpp src/Portfolio.cpp src/Analytics.cpp src/MenuSystem.cpp src/UIHelpers.cpp src/Strategy.cpp src/Backtester.cpp src/StockManager.cpp -o quantlab
 ./quantlab
-
-
-## indicator vs analytics
-indicators are like signals, of when to buy or sell. ... analytics are more like how the stock or portfolio is performing

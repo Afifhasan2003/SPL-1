@@ -78,13 +78,11 @@ bool MAStrategy::shouldSell(Stock *stock, int day, bool currentlyHolding)
 }
 
 BuyHoldStrategy::BuyHoldStrategy() : Strategy("Buy and Hold") {}
-bool BuyHoldStrategy::shouldBuy(Stock *stock, int day, bool currentlyHolding)
-{
+bool BuyHoldStrategy::shouldBuy(Stock *stock, int day, bool currentlyHolding){
     // Buy only on first valid day (after indicators calculated)
     return (!currentlyHolding && day >= 50);
 }
-bool BuyHoldStrategy::shouldSell(Stock *stock, int day, bool currentlyHolding)
-{
+bool BuyHoldStrategy::shouldSell(Stock *stock, int day, bool currentlyHolding){
     // Never sell
     return false;
 }

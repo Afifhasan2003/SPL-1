@@ -55,7 +55,6 @@ void loadPortfolios(vector<Portfolio *> &portfolios)
 
 void loadStocksFromWatchlist(map<string, Stock *> &stocks)
 {
-    // Auto-load stocks from watchlist
     cout << "\nLoading watchlist stocks..." << endl;
     ifstream watchlistFile("watchList.txt");
 
@@ -83,7 +82,7 @@ void loadStocksFromWatchlist(map<string, Stock *> &stocks)
 
         if (loadedCount > 0)
         {
-            cout << "\n✓ " << loadedCount << " stock(s) loaded from watchlist!" << endl;
+            cout << "\nSS " << loadedCount << " stock(s) loaded from watchlist!" << endl;
         }
     }
     else
@@ -262,12 +261,12 @@ int main()
 
                             currentPortfolio->saveToFile(filename);
                         }
-                        else if (action == 4){
+                        else if (action == 4){ //displayHoldings
                             UIHelpers::clearScreen();
                             currentPortfolio->displayHoldings();
                             UIHelpers::pauseScreen();
                         }   
-                        else if (action == 5){
+                        else if (action == 5){ //display transactions
                             UIHelpers::clearScreen();
                             currentPortfolio->displayTransactions();
                             UIHelpers::pauseScreen();
