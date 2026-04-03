@@ -28,5 +28,11 @@ indicators are like signals, of when to buy or sell. ... analytics are more like
 
 
 ## How to Run
-g++ -std=c++17 main.cpp src/Stock.cpp src/Portfolio.cpp src/Analytics.cpp src/MenuSystem.cpp src/UIHelpers.cpp src/Strategy.cpp src/Backtester.cpp src/StockManager.cpp -o quantlab
+g++ -std=c++17 main.cpp src/Stock.cpp src/Portfolio.cpp src/Analytics.cpp src/MenuSystem.cpp src/UIHelpers.cpp src/Strategy.cpp src/Backtester.cpp src/StockManager.cpp src/DataFetcher.cpp -o quantlab
+./quantlab
+
+
+OR
+
+g++ -std=c++17 -o quantlab main.cpp src/*.cpp -lcurl
 ./quantlab

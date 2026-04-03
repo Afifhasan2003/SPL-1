@@ -53,6 +53,7 @@ void StockManager::viewStockInfo(map<string, Stock *> &stocks)
         string symbol;
         cout << "Enter symbol to view: ";
         cin >> symbol;
+        for (char& c : symbol) c = toupper(c);
 
         if (stocks.find(symbol) != stocks.end())
         {
@@ -91,6 +92,7 @@ void StockManager::viewIndicators(map<string, Stock *> &stocks)
         string symbol;
         cout << "Enter symbol: ";
         cin >> symbol;
+        for (char& c : symbol) c = toupper(c);
 
         if (stocks.find(symbol) == stocks.end())
             cout << "Stock not found." << endl;
@@ -311,6 +313,7 @@ void StockManager::viewAnalytics(map<string, Stock *> &stocks)
         string sym;
         cout << "Enter symbol: ";
         cin >> sym;
+        for (char& c : sym) c = toupper(c);
 
         if (stocks.find(sym) != stocks.end())
         {
@@ -340,6 +343,7 @@ void StockManager::backtestStrategy(map<string, Stock *> &stocks)
         string symbol;
         cout << "Enter symbol: ";
         cin >> symbol;
+        for (char& c : symbol) c = toupper(c);
 
         if (stocks.find(symbol) == stocks.end())
         {

@@ -11,8 +11,10 @@ bool UIHelpers::loadStockIfNeeded(string symbol, map<string, Stock*>& stocks) {
         return true;
     }
     
+    for (char& c : symbol) c = toupper(c);
+    
     // Check if CSV file exists
-    string filename = "data/stocks/" + symbol + ".csv";
+    string filename = "data/" + symbol + ".csv";
     
     if (!fs::exists(filename)) {
         cout << "✗ Error: " << symbol << " not found in data/ folder" << endl;

@@ -56,7 +56,8 @@ bool Stock::loadFromCSV(string filename)
         highPrices.push_back(stod(trimf(high)));
         lowPrices.push_back(stod(trimf(low)));
         closePrices.push_back(stod(trimf(close)));
-        volumes.push_back(stoll(trimf(volume)));
+        // volumes.push_back(stoll(trimf(volume)));
+        volumes.push_back((long long)stod(trimf(volume)));
     }
 
     file.close();

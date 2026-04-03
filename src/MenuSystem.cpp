@@ -13,7 +13,8 @@ void MenuSystem::displayMainMenu() {
     cout << "4. View Indicators" << endl;
     cout << "5. View Analytics" << endl;
     cout << "6. Backtest Strategy" << endl;
-    cout << "7. Exit" << endl;
+    cout << "7. Update Stock Data" << endl;
+    cout << "8. Exit" << endl;
     cout << "======================================" << endl;
     cout << "Enter choice: ";
 }

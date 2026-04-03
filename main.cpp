@@ -12,6 +12,9 @@
 #include <iomanip>
 #include <filesystem>
 #include <fstream>
+#include "include/DataFetcher.h"
+#include <thread> 
+#include <chrono>
 
 using namespace std;
 namespace fs = std::filesystem; // fs is an alias, to avoid writing std::filesystem every time
@@ -91,6 +94,19 @@ void loadStocksFromWatchlist(map<string, Stock *> &stocks)
     }
 }
 
+void updateStocksFromWatchlist( map<string, Stock *> &stocks){   
+    // Auto-update watchlist stock data
+    cout << "\nChecking for outdated stock data..." << endl;
+    DataFetcher::updateWatchlist("watchList.txt");
+    // Reload any stocks that were updated
+    for (auto& pair : stocks) {
+        string filename = "data/" + pair.first + ".csv";
+        if (fs::exists(filename)) {
+            pair.second->loadFromCSV(filename);
+        }
+    }
+}
+
 
 int main()
 {
@@ -101,7 +117,10 @@ int main()
          << endl;
 
     loadPortfolios(portfolios);
-    loadStocksFromWatchlist(stocks);
+    loadStocksFromWatchlist(stocks);  
+    updateStocksFromWatchlist(stocks);
+
+
     cout<<"\n\n\n\n\n\n\n\n";
 
     while (true)
@@ -337,7 +356,61 @@ int main()
             UIHelpers::clearScreen();
             StockManager::backtestStrategy(stocks);
         }
-        else if (choice == 7) // Exit
+
+
+        else if (choice == 7){
+            // ===== UPDATE STOCK DATA =====
+            cout << "\n=== Update Stock Data ===" << endl;
+            cout << "1. Update watchlist stocks" << endl;
+            cout << "2. Update specific stock by symbol" << endl;
+            cout << "Enter choice: ";
+            
+            int updateChoice;
+            cin >> updateChoice;
+            
+            if (updateChoice == 1) {
+                // Update all watchlist stocks
+                DataFetcher::updateWatchlist("watchlist.txt");
+                // Reload any already-loaded stocks with fresh data
+                for (auto& pair : stocks) {
+                    string filename = "data/" + pair.first + ".csv";
+                    if (fs::exists(filename)) {
+                        pair.second->loadFromCSV(filename);
+                    }
+                }
+                UIHelpers::pauseScreen();
+                
+            } else if (updateChoice == 2) {
+                // Update specific stock by symbol
+                string symbol;
+                cout << "\nEnter stock symbol: ";
+                cin >> symbol;
+                
+                for (char& c : symbol) c = toupper(c);
+                
+                if (DataFetcher::updateStock(symbol)) {
+                    // If already loaded in memory, reload with fresh data
+                    if (stocks.find(symbol) != stocks.end()) {
+                        stocks[symbol]->loadFromCSV("data/" + symbol + ".csv");
+                        cout << "✓ " << symbol << " reloaded with fresh data!" << endl;
+                    } else {
+                        // Not loaded yet — offer to load it
+                        char load;
+                        cout << "Load " << symbol << " into memory? (y/n): ";
+                        cin >> load;
+                        if (load == 'y' || load == 'Y') {
+                            UIHelpers::loadStockIfNeeded(symbol, stocks);
+                        }
+                    }
+                }
+                UIHelpers::pauseScreen();
+                
+            } else {
+                cout << "Invalid choice." << endl;
+            }
+            
+        }
+        else if (choice == 8) // Exit
         {
             cout << "\nThank you for using Finance Bazar!" << endl;
             break;
