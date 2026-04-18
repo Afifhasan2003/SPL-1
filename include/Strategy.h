@@ -2,6 +2,7 @@
 #define STRATEGY_H
 
 #include "Stock.h"
+#include "Regression.h"
 #include <string>
 
 using namespace std;
@@ -69,6 +70,31 @@ public:
     MomentumStrategy();
     bool shouldBuy(Stock *stock, int day, bool currentHolding) override;
     bool shouldSell(Stock *stock, int day, bool currentHolding) override;
+};
+
+
+// Regression Strategy: Train on first 70% of range, trade on remaining 30%
+// Buy if predicted increase > threshold%, Sell if predicted decrease > threshold%
+class RegressionStrategy : public Strategy {
+private:
+    Regression model;   // the regression model instance, has all the methods to train and predict
+    bool modelTrained;
+    int trainEndDay;   // Last day used for training
+    
+public:
+    RegressionStrategy();
+    
+    // Must be called before backtesting to train on the given range
+    void trainModel(Stock* stock, int startDay, int endDay);
+    
+    bool shouldBuy(Stock* stock, int day, bool currentlyHolding) override;
+    bool shouldSell(Stock* stock, int day, bool currentlyHolding) override;
+    
+    // Get the day training ended (backtest should start from trainEndDay+1)
+    int getTrainEndDay() const;
+    
+    // Check if model has been trained successfully
+    bool trained() const;
 };
 
 #endif
