@@ -13,8 +13,9 @@ void MenuSystem::displayMainMenu() {
     cout << "4. View Indicators" << endl;
     cout << "5. View Analytics" << endl;
     cout << "6. Backtest Strategy" << endl;
-    cout << "7. Update Stock Data" << endl;
-    cout << "8. Exit" << endl;
+    cout << "7. Regression Model" << endl;
+    cout << "8. Update Stock Data" << endl;
+    cout << "9. Exit" << endl;
     cout << "======================================" << endl;
     cout << "Enter choice: ";
 }
@@ -31,9 +32,9 @@ void MenuSystem::displayPortfolioMenu() {
     cout << "Enter choice: ";
 }
 
-void MenuSystem::displaySelectedPortfolioMenu(string portfolioName) {
+void MenuSystem::displaySelectedPortfolioMenu(string portfolioName, double cashBalance) {
     cout << "\n======================================" << endl;
-    cout << "  Portfolio: " << portfolioName << endl;
+    cout << "  Portfolio: " << portfolioName << " (Cash: $" << cashBalance << ")" << endl;
     cout << "======================================" << endl;
     cout << "1. Add cash" << endl;
     cout << "2. Buy stock" << endl;
@@ -42,7 +43,20 @@ void MenuSystem::displaySelectedPortfolioMenu(string portfolioName) {
     cout << "5. View transactions" << endl;
     cout << "6. View summary" << endl;
     cout << "7. View performance analytics" << endl;
-    cout << "8. Back" << endl;
+    cout << "8. Today's best performer prediction" << endl;
+    cout << "9. Back" << endl;
+    cout << "======================================" << endl;
+    cout << "Enter choice: ";
+}
+
+void MenuSystem::displayRegressionMenu(string symbol) {
+    cout << "\n======================================" << endl;
+    cout << "  Regression Model: " << symbol << endl;
+    cout << "======================================" << endl;
+    cout << "1. Train model" << endl;
+    cout << "2. Predict next day" << endl;
+    cout << "3. View report" << endl;
+    cout << "4. Back" << endl;
     cout << "======================================" << endl;
     cout << "Enter choice: ";
 }

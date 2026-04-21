@@ -91,10 +91,10 @@ public:
     bool shouldSell(Stock* stock, int day, bool currentlyHolding) override;
     
     // Get the day training ended (backtest should start from trainEndDay+1)
-    int getTrainEndDay() const;
+    int getTrainEndDay() ;
     
     // Check if model has been trained successfully
-    bool trained() const;
+    bool trained() ;
 };
 
 #endif

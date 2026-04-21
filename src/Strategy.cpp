@@ -1,4 +1,5 @@
 #include "../include/Strategy.h"
+#include <iostream>
 
 using namespace std;
 
@@ -151,4 +152,55 @@ bool MomentumStrategy::shouldSell(Stock *stock, int day, bool currentlyHolding)
         return true;
     else
         return false;
+}
+
+
+
+// ─── Regression Strategy ─────────────────────────────────────────────────────
+RegressionStrategy::RegressionStrategy() : Strategy("Regression Strategy") {
+    modelTrained = false;
+    trainEndDay = 0;
+}
+
+void RegressionStrategy::trainModel(Stock* stock, int startDay, int endDay) {
+    // Train on first 70% of the range
+    int rangeSize = endDay - startDay;
+    trainEndDay = startDay + (int)(rangeSize * 0.70);
+
+    cout << "\n[Regression Strategy] Training on days " << startDay
+         << " to " << trainEndDay << "..." << endl;
+
+    model.train(stock, startDay, trainEndDay);
+    modelTrained = model.trained();
+
+    if (modelTrained) {
+        cout << "[Regression Strategy] Testing on days " << (trainEndDay + 1)
+             << " to " << endDay << endl;
+    }
+}
+
+bool RegressionStrategy::shouldBuy(Stock* stock, int day, bool currentlyHolding) {
+    if (!modelTrained) return false;
+    if (currentlyHolding) return false;
+    if (day <= trainEndDay) return false;  // Don't trade during training period
+
+    string signal = model.getSignal(stock, day);
+    return (signal == "BUY");
+}
+
+bool RegressionStrategy::shouldSell(Stock* stock, int day, bool currentlyHolding) {
+    if (!modelTrained) return false;
+    if (!currentlyHolding) return false;
+    if (day <= trainEndDay) return false;  // Don't trade during training period
+
+    string signal = model.getSignal(stock, day);
+    return (signal == "SELL");
+}
+
+int RegressionStrategy::getTrainEndDay()  {
+    return trainEndDay;
+}
+
+bool RegressionStrategy::trained()  {
+    return modelTrained;
 }
