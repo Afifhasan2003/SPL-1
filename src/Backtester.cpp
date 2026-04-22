@@ -42,7 +42,7 @@ void Backtester::run()
     double buyPrice = 0;
     double peak = startingCash;
 
-    cout << "\nRunning backtest for: " << strategy->getName() << endl;
+    cout << "\n\nRunning backtest for: " << strategy->getName() << endl;
     cout << "Starting cash: $" << startingCash << endl;
     cout << "Stock: " << stock->getSymbol() << endl;
     cout << "Period: from day: " << startDay << " to day: " << endDay << " (" << endDay - startDay + 1 << ")days" << endl;
@@ -131,7 +131,7 @@ void Backtester::run()
     finalValue = cash;
     totalReturn = ((finalValue - startingCash) / startingCash) * 100;
 
-    cout << "back testing complete!" << endl;
+    cout << "\n\nback testing complete!" << endl;
 }
 
 void Backtester::displayResult()
@@ -144,13 +144,13 @@ void Backtester::displayResult()
     cout << "----------------------------------------" << endl;
     cout << fixed << setprecision(2);
 
-    cout << "\nPerformance:" << endl;
+    cout << "\n\n\nPerformance:" << endl;
     cout << "  Starting Capital: $" << startingCash << endl;
     cout << "  Final Value: $" << finalValue << endl;
     cout << "  Total Return: " << totalReturn << "%" << endl;
     cout << "  Max Drawdown: " << maxDrawdown << "%" << endl;
 
-    cout << "\nTrading Activity:" << endl;
+    cout << "\n\n\nTrading Activity:" << endl;
     cout << "  Total Trades: " << numTrades << endl;
 
     if (numTrades > 0)

@@ -232,7 +232,7 @@ void Regression::train(Stock* stock, int startDay, int endDay) {
         return;
     }
 
-    cout << "✓ Collected " << n << " valid training samples." << endl;
+    cout << " Collected " << n << " valid training samples." << endl;
 
     //  Step 2: Compute feature means and stds for Z-score normalization 
     featureMeans.assign(NUM_FEATURES, 0.0);     //This is used for resetting and initializing a vector to a specific size and value, 
@@ -353,10 +353,10 @@ void Regression::train(Stock* stock, int startDay, int endDay) {
 
     isTrained = true;
 
-    cout << "✓ Model trained successfully!" << endl;
+    cout << " Model trained successfully!" << endl;
     cout << fixed << setprecision(4);
-    cout << "  R² Score: " << rSquared << endl;
-    cout << "  MAE: $" << meanAbsoluteError << endl;
+    cout << "  R² Score: " << rSquared << endl;     // R² near 1 means the model's predictions are very close
+    cout << "  MAE: $" << meanAbsoluteError << endl;    // MAE of $1.50 means on average the model's predictions are off by $1.50, 
 }
 
 // Predict next-day closing price for given day (returns -1.0 if model not trained or features unavailable)

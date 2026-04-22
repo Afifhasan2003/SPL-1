@@ -1,7 +1,7 @@
 Portfolio_name:afif
-Cash:8119.06
+Cash:7919.06
 Holdings:
-A,2,50,unknown date
+A,4,75,unknown date
 AAPL,9,267.85,unknown date
 TSLA,5,100,unknown date
 Transactions:
@@ -13,3 +13,4 @@ sell 2 shares of A at price 100.000000 on unknown date
 sell 2 shares of A at price 100.000000 on unknown date
 sell 2 shares of A at price 138.779999 on unknown date
 sell 1 shares of AAPL at price 1000.000000 on unknown date
+Buy 2 A stocks at price 100.000000 on unknown date

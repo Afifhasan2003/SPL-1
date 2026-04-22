@@ -353,11 +353,10 @@ void StockManager::backtestStrategy(map<string, Stock *> &stocks)
 
         if (stocks.find(symbol) == stocks.end())
         {
-            cout << "stock not founc" << endl;
+            cout << "stock not found" << endl;
         }
         else
         {
-
             int stratChoice;
 
             bool isValidStratChoice = true;
@@ -387,10 +386,10 @@ void StockManager::backtestStrategy(map<string, Stock *> &stocks)
             cout << "Enter initial Cash: $";
             cin >> giveCash;
 
-            pair range = UIHelpers::getDateRange(stocks[symbol]);
+            pair<int, int> range = UIHelpers::getDateRange(stocks[symbol]);
 
-            if (stratChoice != 7)
-            { // single strategy
+            if (stratChoice != 7)// single strategy
+            { 
                 Strategy *strategy = nullptr;
                 if (stratChoice == 1)
                 {
@@ -432,95 +431,97 @@ void StockManager::backtestStrategy(map<string, Stock *> &stocks)
                         UIHelpers::pauseScreen();
                         delete regStrat;
                     }
+                }
+                else if (stratChoice == 8)
+                {
+                    return;
+                }
 
-                    // run backtester
+                // run backtester for strategies 1-5
+                if (stratChoice >= 1 && stratChoice <= 5)
+                {
                     Backtester backtester(stocks[symbol], strategy, giveCash, range.first, range.second);
                     backtester.run();
                     backtester.displayResult();
 
+                    UIHelpers::pauseScreen();
                     delete strategy;
                 }
-                else if (stratChoice == 7) // all strategy
+            }
+            else if (stratChoice == 7) // all strategy
+            {
+                cout << "\n=== COMPARING ALL STRATEGIES ===" << endl;
+
+                // Standard strategies
+                RSIStrategy *s1 = new RSIStrategy();
+                MAStrategy *s2 = new MAStrategy();
+                MACDStrategy *s3 = new MACDStrategy();
+                MomentumStrategy *s4 = new MomentumStrategy();
+                BuyHoldStrategy *s5 = new BuyHoldStrategy();
+                RegressionStrategy *s6 = new RegressionStrategy();
+
+                // Train regression on this range before backtesting
+                s6->trainModel(stocks[symbol], range.first, range.second);
+
+                Strategy *strategies[] = {s1, s2, s3, s4, s5, s6};
+                int numStrategies = 6;
+
+                vector<double> returns;
+                vector<string> names;
+
+                for (int i = 0; i < numStrategies; i++)
                 {
-                    // ── Compare all strategies ────────────────────────────
-                    cout << "\n=== COMPARING ALL STRATEGIES ===" << endl;
+                    Backtester backtester(stocks[symbol], strategies[i], giveCash, range.first, range.second);
+                    backtester.run();
+                    returns.push_back(backtester.getTotalReturn());
+                    names.push_back(strategies[i]->getName());
+                }
 
-                    // Standard strategies
-                    RSIStrategy *s1 = new RSIStrategy();
-                    MAStrategy *s2 = new MAStrategy();
-                    MACDStrategy *s3 = new MACDStrategy();
-                    MomentumStrategy *s4 = new MomentumStrategy();
-                    BuyHoldStrategy *s5 = new BuyHoldStrategy();
-                    RegressionStrategy *s6 = new RegressionStrategy();
+                // Display comparison table
+                cout << "\n========================================" << endl;
+                cout << "    STRATEGY COMPARISON" << endl;
+                cout << "========================================" << endl;
+                cout << "Stock: " << symbol << endl;
+                cout << "Starting Capital: $" << giveCash << endl;
+                cout << "----------------------------------------" << endl;
+                cout << fixed << setprecision(2);
 
-                    // Train regression on this range before backtesting
-                    s6->trainModel(stocks[symbol], range.first, range.second);
-
-                    Strategy *strategies[] = {s1, s2, s3, s4, s5, s6};
-                    int numStrategies = 6;
-
-                    vector<double> returns;
-                    vector<string> names;
-
-                    for (int i = 0; i < numStrategies; i++)
+                // Find best strategy
+                int bestIdx = 0;
+                double bestReturn = returns[0];
+                for (int i = 1; i < (int)returns.size(); i++)
+                {
+                    if (returns[i] > bestReturn)
                     {
-                        Backtester backtester(stocks[symbol], strategies[i], giveCash, range.first, range.second);
-                        backtester.run();
-                        returns.push_back(backtester.getTotalReturn());
-                        names.push_back(strategies[i]->getName());
-                    }
-
-                    // Display comparison table
-                    cout << "\n========================================" << endl;
-                    cout << "    STRATEGY COMPARISON" << endl;
-                    cout << "========================================" << endl;
-                    cout << "Stock: " << symbol << endl;
-                    cout << "Starting Capital: $" << giveCash << endl;
-                    cout << "----------------------------------------" << endl;
-                    cout << fixed << setprecision(2);
-
-                    // Find best strategy
-                    int bestIdx = 0;
-                    double bestReturn = returns[0];
-                    for (int i = 1; i < (int)returns.size(); i++)
-                    {
-                        if (returns[i] > bestReturn)
-                        {
-                            bestReturn = returns[i];
-                            bestIdx = i;
-                        }
-                    }
-
-                    for (int i = 0; i < (int)names.size(); i++)
-                    {
-                        cout << "\n"
-                             << i + 1 << ". " << names[i] << endl; // names = {"RSI Strategy", "MA Crossover", "MACD Strategy", "Momentum Strategy", "Buy & Hold", "Regression Strategy"};
-                        cout << "   Return: " << returns[i] << "%";
-                        if (i == bestIdx)
-                        {
-                            cout << " ⭐ BEST";
-                        }
-                        cout << endl;
-                        cout << "   Final Value: $" << (giveCash * (1 + returns[i] / 100.0)) << endl;
-                    }
-
-                    cout << "\n========================================" << endl;
-                    cout << "Best Strategy: " << names[bestIdx] << endl;
-                    cout << "Best Return: " << bestReturn << "%" << endl;
-                    cout << "========================================" << endl;
-
-                    UIHelpers::pauseScreen();
-
-                    // Clean up
-                    for (int i = 0; i < numStrategies; i++)
-                    {
-                        delete strategies[i];
+                        bestReturn = returns[i];
+                        bestIdx = i;
                     }
                 }
-                else
+
+                for (int i = 0; i < (int)names.size(); i++)
                 {
-                    cout << "invalid choise.." << endl;
-                    // continue;
+                    cout << "\n"
+                         << i + 1 << ". " << names[i] << endl; // names = {"RSI Strategy", "MA Crossover", "MACD Strategy", "Momentum Strategy", "Buy & Hold", "Regression Strategy"};
+                    cout << "   Return: " << returns[i] << "%";
+                    if (i == bestIdx)
+                    {
+                        cout << " ⭐ BEST";
+                    }
+                    cout << endl;
+                    cout << "   Final Value: $" << (giveCash * (1 + returns[i] / 100.0)) << endl;
+                }
+
+                cout << "\n========================================" << endl;
+                cout << "Best Strategy: " << names[bestIdx] << endl;
+                cout << "Best Return: " << bestReturn << "%" << endl;
+                cout << "========================================" << endl;
+
+                UIHelpers::pauseScreen();
+
+                // Clean up
+                for (int i = 0; i < numStrategies; i++)
+                {
+                    delete strategies[i];
                 }
             }
         }

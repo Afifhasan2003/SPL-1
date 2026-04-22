@@ -50,9 +50,9 @@ void MenuSystem::displaySelectedPortfolioMenu(string portfolioName, double cashB
 }
 
 void MenuSystem::displayRegressionMenu(string symbol) {
-    cout << "\n======================================" << endl;
-    cout << "  Regression Model: " << symbol << endl;
-    cout << "======================================" << endl;
+    cout << "\n---------------------------------------" << endl;
+    cout << "  Selected Stock : " << symbol << endl;
+    cout << "----------------------------------------" << endl;
     cout << "1. Train model" << endl;
     cout << "2. Predict next day" << endl;
     cout << "3. View report" << endl;

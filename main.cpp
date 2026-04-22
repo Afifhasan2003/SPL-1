@@ -169,6 +169,7 @@ int main()
         {
             while (true)
             {
+                UIHelpers::clearScreen();
                 MenuSystem::displayPortfolioMenu();
                 int portfolioChoice;
                 cin >> portfolioChoice;
@@ -436,9 +437,9 @@ int main()
                         }
                         else if (action == 8) {// Today's best performer prediction
                             cout << "\n=== Today's Performance Prediction ===" << endl;
-                            cout << "Training models... (this may take a moment)" << endl;
+                            cout << "Training models... " << endl;
 
-                            // ── Read watchlist ────────────────────────────────
+                            //  Read watchlist 
                             vector<string> watchlist;
                             ifstream wf("watchList.txt");
                             if (wf.is_open()) {
@@ -456,7 +457,7 @@ int main()
 
                             cout << fixed << setprecision(2);
 
-                            // ── Holdings: loop through portfolio holdings ──────
+                            //  Holdings: loop through portfolio holdings 
                             cout << "\n Your Holdings:" << endl;
                             cout << "----------------------------------------" << endl;
                             string bestHoldingSym = "";
@@ -563,6 +564,7 @@ int main()
                 }
                 else if (portfolioChoice == 4) // back to main menu
                 {
+                    UIHelpers::clearScreen();
                     break;
                 }
                 else
@@ -576,7 +578,6 @@ int main()
             UIHelpers::clearScreen();
             StockManager::loadStockData(stocks);
         }
-
         else if (choice == 3) // view stock info
         {
             UIHelpers::clearScreen();
@@ -599,8 +600,7 @@ int main()
             StockManager::backtestStrategy(stocks);
         }
 
-        else if (choice == 7) {
-            // ===== REGRESSION MODEL =====
+        else if (choice == 7) {// ===== REGRESSION MODEL =====
             if (stocks.empty()) {
                 cout << "\nNo stocks loaded yet. Load a stock first." << endl;
             } else {
@@ -694,7 +694,7 @@ int main()
             }
 
         }
-        else if (choice == 8)
+        else if (choice == 8)  // ===== UPDATE STOCK DATA =====
         {
             // ===== UPDATE STOCK DATA =====
             while (true)

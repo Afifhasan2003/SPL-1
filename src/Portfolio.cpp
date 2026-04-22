@@ -141,7 +141,7 @@ void Portfolio::displaySummary(map<string, Stock *> &stockData)
     double totalValue = 0.0;
     double totalCost = 0.0;
 
-    for (const auto &pair : holdings)
+    for (const auto &pair : holdings)   //(symbol -> holding(name, quantity, avgCost, date))
     {
         const Holding &h = pair.second;
         double costBasis = h.quantity * h.avgCost;
@@ -272,14 +272,31 @@ void Portfolio::displayPerformanceAnalytics(map<string, Stock *> &stockData)
         if (stockData.find(h.symbol) != stockData.end())
         {
             Stock *stock = stockData.at(h.symbol);
+
             int lastIndex = stock->getDataSize() - 1;
             double currentPrice = stock->getClosePrice(lastIndex);
             currentValue += h.quantity * currentPrice;
         }
-        else
+        else //try to load the stock data if not already loaded
         {
-            currentValue += costBasis;
-            hasMissingData = true;
+
+            // cout << "Warning: Missing data for stock " << h.symbol << endl;
+            Stock *newStock = new Stock(h.symbol, name);
+            string filename = "data/" + h.symbol + ".csv";
+            if (newStock->loadFromCSV(filename))
+            {
+                stockData[h.symbol] = newStock;
+                int lastIndex = newStock->getDataSize() - 1;
+                double currentPrice = newStock->getClosePrice(lastIndex);
+                currentValue += h.quantity * currentPrice;
+            }
+            else
+            {
+                cout << "Warning: Missing data for stock " << h.symbol << ". Using cost basis for analytics." << endl;
+                currentValue += costBasis;
+                currentValue += costBasis;
+                hasMissingData = true;
+            }
         }
     }
 
@@ -307,7 +324,7 @@ void Portfolio::displayPerformanceAnalytics(map<string, Stock *> &stockData)
     // Calculate portfolio volatility (weighted average)
     if (!hasMissingData && !holdings.empty())
     {
-        double weightedVolatility = 0.0;
+        double weightedVolatility = 0.0;    // useful because it represents the overall risk of the portfolio
 
         for (const auto &pair : holdings)
         {
@@ -354,20 +371,21 @@ void Portfolio::displayPerformanceAnalytics(map<string, Stock *> &stockData)
                     double annualizedVol = stdDev * sqrt(252);
 
                     // Add weighted contribution
-                    weightedVolatility += weight * annualizedVol;
+                    weightedVolatility += weight * annualizedVol;   //volatility of portfolio is the weighted average of the volatility of each stock in the portfolio
+                                                                    //determines how unstable hte portfolio is
                 }
             }
         }
 
         cout << "\nRisk Metrics:" << endl;
-        cout << "  Portfolio Volatility: " << weightedVolatility << "%" << endl;
+        cout << "  Portfolio Volatility: " << weightedVolatility << "%  (how unstable the portfolio is)" << endl;
 
         // Sharpe Ratio (assuming 2% risk-free rate)
         double riskFreeRate = 2.0;
         if (weightedVolatility > 0)
         {
             double sharpeRatio = (totalReturn - riskFreeRate) / weightedVolatility;
-            cout << "  Sharpe Ratio: " << sharpeRatio << endl;
+            cout << "  Sharpe Ratio: " << sharpeRatio <<"(how risky the portfolio is)"<< endl;
         }
     }
 
