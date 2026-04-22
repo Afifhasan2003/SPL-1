@@ -93,8 +93,7 @@ void loadStocksFromWatchlist(map<string, Stock *> &stocks)
     }
 }
 
-void updateStocksFromWatchlist(map<string, Stock *> &stocks)
-{
+void updateStocksFromWatchlist(map<string, Stock *> &stocks){
     // Auto-update watchlist stock data
     cout << "\nChecking for outdated stock data..." << endl;
     DataFetcher::updateWatchlist("watchList.txt");
@@ -156,7 +155,7 @@ int main()
 
     loadPortfolios(portfolios);
     loadStocksFromWatchlist(stocks);
-    updateStocksFromWatchlist(stocks);
+    // updateStocksFromWatchlist(stocks);
 
     cout << "\n\n\n\n\n\n\n\n";
 
@@ -182,6 +181,19 @@ int main()
                     cout << "\nEnter portfolio name: ";
                     cin.ignore();
                     getline(cin, name);
+                    if(name.empty()){
+                        cout << "Portfolio name cannot be empty." << endl;
+                        continue;
+                    }
+                    if(name[0] == ' '){
+                        string temp = name;
+                        temp.erase(0, temp.find_first_not_of(" ")); // trim leading spaces
+                        if(temp.empty()){
+                            cout << "Portfolio name cannot be empty." << endl;
+                            continue;
+                        }
+                        name = temp;
+                    }
 
                     Portfolio *newPortfolio = new Portfolio(name);
                     portfolios.push_back(newPortfolio);
@@ -251,6 +263,10 @@ int main()
                             double amount;
                             cout << "Enter amount to add: $";
                             cin >> amount;
+                            string code;
+                            cout<<"Enter confirmation code(string): ";  //this is just a dummy thing,
+                            cin >> code;
+
                             currentPortfolio->addCash(amount);
 
                             string filename = "portfolios/" + currentPortfolio->getName() + ".csv";
@@ -279,16 +295,23 @@ int main()
 
                             cout << "Enter quantity: ";
                             cin >> quantity;
+                            
 
-                            cout << "Enter price per share: $";
+                            cout << "Enter price per share (press 0 to use latest close price): $";
                             cin >> price;
 
-                            // price = getcloseprice(symbol, stocks);
-                            // cout << "Enter date (YYYY-MM-DD): ";
-                            // cin >> date;
+                            
+                            if(price == 0){
+                            Stock* stock = stocks[symbol];
+                            int lastDay = stock->getDataSize() - 1;
+                            price = stock->getClosePrice(lastDay);
+                            }
+                            
+                            
 
                             // currentPortfolio->buyStock(symbol, quantity, price, date);
                             currentPortfolio->buyStock(symbol, quantity, price, "unknown date");
+                                //everytime a new holding instance is created and stored
 
                             string filename = "portfolios/" + currentPortfolio->getName() + ".csv";
                             for (char &c : filename)
@@ -299,21 +322,73 @@ int main()
                         }
                         else if (action == 3) // sell stock
                         {
+                            currentPortfolio->displayHoldings();
+
                             string symbol, date;
                             int quantity;
                             double price;
 
                             cout << "Enter stock symbol: ";
                             cin >> symbol;
+                            for(char &c : symbol)
+                                c = toupper(c);
+
+                            if (!currentPortfolio->hasStock(symbol) )
+                            {
+                                cout << "Stock " << symbol << " not found in records." << endl;
+                                UIHelpers::pauseScreen();
+                                continue;
+                            }
+
+                            if (!UIHelpers::loadStockIfNeeded(symbol, stocks))
+                            {
+                                cout << "Cannot sell " << symbol << ". Not an available stock." << endl;
+                                UIHelpers::pauseScreen();
+                                continue;
+                            }
+
+                            Holding h =  currentPortfolio->getHolding(symbol); //find the holding instance  
+
                             cout << "Enter quantity: ";
                             cin >> quantity;
-                            cout << "Enter price per share: $";
+                            cout << "Enter price per share (press 0 to use latest close price): $";
                             cin >> price;
+
+                            auto stockIt = stocks.find(symbol);
+                            if (stockIt == stocks.end() || stockIt->second == nullptr)
+                            {
+                                cout << "Stock object for " << symbol << " is not loaded." << endl;
+                                UIHelpers::pauseScreen();
+                                continue;
+                            }
+
+                            Stock* stock = stockIt->second;
+                            int dataSize = stock->getDataSize();
+                            if (dataSize <= 0)
+                            {
+                                cout << "No price history available for " << symbol << "." << endl;
+                                UIHelpers::pauseScreen();
+                                continue;
+                            }
+
+                            int lastDay = dataSize - 1;
+                            double actualPrice = stock->getClosePrice(lastDay);
+
+                            if(price == 0){
+                                price = actualPrice;
+                            }
+
                             // cout << "Enter date (YYYY-MM-DD): ";
                             // cin >> date;
 
                             // currentPortfolio->sellStock(symbol, quantity, price, date);
                             currentPortfolio->sellStock(symbol, quantity, price, "unknown date");
+
+
+
+
+                            cout<<" Sold " << quantity << " shares of " << symbol << " at $" << price << " per share." << endl;
+                            cout<<"Profit/Loss: $"<< quantity * (price - h.avgCost) << endl;
 
                             string filename = "portfolios/" + currentPortfolio->getName() + ".csv";
                             for (char &c : filename)
@@ -321,15 +396,16 @@ int main()
                                     c = '_';
 
                             currentPortfolio->saveToFile(filename);
+
+                            UIHelpers::pauseScreen();
+
                         }
-                        else if (action == 4)
-                        { // displayHoldings
+                        else if (action == 4){ // displayHoldings
                             UIHelpers::clearScreen();
                             currentPortfolio->displayHoldings();
                             UIHelpers::pauseScreen();
                         }
-                        else if (action == 5)
-                        { // display transactions
+                        else if (action == 5){ // display transactions
                             UIHelpers::clearScreen();
                             currentPortfolio->displayTransactions();
                             UIHelpers::pauseScreen();
@@ -358,14 +434,13 @@ int main()
                                 UIHelpers::pauseScreen();
                             }
                         }
-                        else if (action == 8) {
-                            // Today's best performer prediction
+                        else if (action == 8) {// Today's best performer prediction
                             cout << "\n=== Today's Performance Prediction ===" << endl;
                             cout << "Training models... (this may take a moment)" << endl;
 
                             // ── Read watchlist ────────────────────────────────
                             vector<string> watchlist;
-                            ifstream wf("watchlist.txt");
+                            ifstream wf("watchList.txt");
                             if (wf.is_open()) {
                                 string wline;
                                 while (getline(wf, wline)) {
@@ -573,7 +648,7 @@ int main()
                     } else if (regChoice == 2) {
                         // ── Predict next day ──────────────────────────────────
                         if (!reg->trained()) {
-                            cout << "\n✗ Model not trained yet. Please train first (option 1)." << endl;
+                            cout << "\n Model not trained yet. Please train first (option 1)." << endl;
                             UIHelpers::pauseScreen();
                             continue;
                         }
@@ -622,9 +697,11 @@ int main()
         else if (choice == 8)
         {
             // ===== UPDATE STOCK DATA =====
-            cout << "\n=== Update Stock Data ===" << endl;
+            while (true)
+            { cout << "\n=== Update Stock Data ===" << endl;
             cout << "1. Update watchlist stocks" << endl;
             cout << "2. Update specific stock by symbol" << endl;
+            cout << "3. Back to  menu" << endl;
             cout << "Enter choice: ";
 
             int updateChoice;
@@ -633,7 +710,7 @@ int main()
             if (updateChoice == 1)
             {
                 // Update all watchlist stocks
-                DataFetcher::updateWatchlist("watchlist.txt");
+                DataFetcher::updateWatchlist("watchList.txt");
                 // Reload any already-loaded stocks with fresh data
                 for (auto &pair : stocks)
                 {
@@ -677,10 +754,14 @@ int main()
                 }
                 UIHelpers::pauseScreen();
             }
+            else if (updateChoice == 3)
+            {
+                break;
+            }
             else
             {
                 cout << "Invalid choice." << endl;
-            }
+            }}
         }
         else if (choice == 9) // Exit
         {

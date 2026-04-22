@@ -95,6 +95,6 @@ void UIHelpers::clearScreen() {
 
 void UIHelpers::pauseScreen() {
     cout << "\nPress Enter to continue...";
-    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+    cin.ignore(numeric_limits<streamsize>::max(), '\n');    // Clear input buffer before waiting for Enter coz sometimes previous cin leaves a newline in the buffer
     cin.get();
 }

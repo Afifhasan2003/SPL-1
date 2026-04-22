@@ -46,6 +46,8 @@ public:
 
     bool saveToFile(string filename);
     bool loadFromFile(string filename);
+
+    Holding getHolding(string symbol);
 };
 
 #endif

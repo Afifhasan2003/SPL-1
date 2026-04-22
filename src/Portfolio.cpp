@@ -95,6 +95,7 @@ void Portfolio::displayHoldings()
     }
 
     cout << "\nHoldings in " << name << " portfolio" << ">>>" << endl;
+    cout<< "---------------------------------------------------------------" << endl;
     cout << "Symbol\t Quantity \t averageCost \t Total" << endl;
     for (auto &pair : holdings)
     {
@@ -492,4 +493,11 @@ bool Portfolio::loadFromFile(string filename)
 
     file.close();
     return true;
+}
+
+Holding Portfolio::getHolding(string symbol) {
+        if (hasStock(symbol))
+            return holdings.at(symbol);
+        else
+            return Holding{"", 0, 0.0, ""}; // return an empty holding if not found
 }
