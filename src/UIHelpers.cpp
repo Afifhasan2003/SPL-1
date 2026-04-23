@@ -17,7 +17,7 @@ bool UIHelpers::loadStockIfNeeded(string symbol, map<string, Stock*>& stocks) {
     string filename = "data/" + symbol + ".csv";
     
     if (!fs::exists(filename)) {
-        cout << "✗ Error: " << symbol << " not found in data/ folder" << endl;
+        cout << " Error: " << symbol << " not found in data/ folder" << endl;
         return false;
     }
     
@@ -30,7 +30,7 @@ bool UIHelpers::loadStockIfNeeded(string symbol, map<string, Stock*>& stocks) {
         cout << symbol << " loaded successfully!" << endl;
         return true;
     } else {
-        cout << "✗ Failed to load " << symbol << endl;
+        cout << " Failed to load " << symbol << endl;
         delete newStock;
         return false;
     }
@@ -91,7 +91,6 @@ void UIHelpers::clearScreen() {
         system("clear");
     #endif
 }
-
 
 void UIHelpers::pauseScreen() {
     cout << "\nPress Enter to continue...";

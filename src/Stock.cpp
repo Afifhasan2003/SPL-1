@@ -10,7 +10,7 @@ string trimf(string &str)
 {
     int start = str.find_first_not_of(" \t\r\n");
     int end = str.find_last_not_of(" \t\r\n");
-    if (start == string::npos)
+    if (start == string::npos)  //npos= no position, means the string is all whitespace
         return "";
     return str.substr(start, end - start + 1);
 }
@@ -158,13 +158,13 @@ void Stock::calculateSMA(int period)
         sum += closePrices[i];
         double sma = sum / period;
         vec->push_back(sma);
-        sum -= closePrices[i - period];
+        sum -= closePrices[i - (period - 1)];
     }
 }
 
 void Stock::calculateAllIndicators()
 {
-    // this is called d
+   
     // cout << "Calculating indicators of " << name << " company ...." << endl;
     calculateSMA(20);
     calculateSMA(50);
@@ -227,12 +227,12 @@ void Stock::calculateMACD()
         }
         else
         {
-            double val = ema12[i] - ema26[i];
+            double val = ema12[i] - ema26[i]; //positive = short term price is above long term price, negative = short term price is below long term price
             macd.push_back(val);
         }
     }
 
-    // calculate signal line = 9-day ema of macd
+    // calculate signal line = 9-day ema of macd (makes the signal smoother, less false signals)
     double multiplier = 2.0 / (9 + 1);
 
     for (int i = 0; i < macd.size(); i++)
@@ -309,7 +309,8 @@ void Stock::calculateBoillingerBands(int period, double n)
 }
 
 void Stock::calculateMomentum(int period)
-{
+{   // momentum = percentage change in price over a specified period
+
     momentum.clear();
 
     for (int i = 0; i < period; i++)
@@ -327,7 +328,7 @@ void Stock::calculateMomentum(int period)
 
 void Stock::calculateRSI(int period) // relative strength index,
 {
-    //if rsi is above 70, stock is overbought; below 30, oversold
+    //if rsi is above 70, stock is overbought, dont buy; below 30, oversold , good time to buy
 
     rsi.clear();
     if (closePrices.size() < period + 1)

@@ -155,7 +155,7 @@ int main()
 
     loadPortfolios(portfolios);
     loadStocksFromWatchlist(stocks);
-    // updateStocksFromWatchlist(stocks);
+    updateStocksFromWatchlist(stocks);
 
     cout << "\n\n\n\n\n\n\n\n";
 
