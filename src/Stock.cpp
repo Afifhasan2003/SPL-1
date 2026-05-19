@@ -3,8 +3,23 @@
 #include <fstream>
 #include <sstream>
 #include <cmath>
+#include <exception>
 
 using namespace std;
+
+static bool tryParseDouble(const string &value, double &out)
+{
+    try
+    {
+        size_t parsedChars = 0;
+        out = stod(value, &parsedChars);
+        return parsedChars == value.size();
+    }
+    catch (const exception &)
+    {
+        return false;
+    }
+}
 
 string trimf(string &str)
 {
@@ -18,7 +33,7 @@ string trimf(string &str)
 Stock::Stock(string sym, string stcockName)
 {
     symbol = sym;
-    name = name;
+    name = stcockName;
 }
 
 bool Stock::loadFromCSV(string filename)
@@ -33,12 +48,25 @@ bool Stock::loadFromCSV(string filename)
     string oneline;
     int lineNumber = 0;
 
+    // Re-loading should replace previous data, not append to in-memory vectors.
+    dates.clear();
+    openPrices.clear();
+    highPrices.clear();
+    lowPrices.clear();
+    closePrices.clear();
+    volumes.clear();
+
+    int parsedRows = 0;
+
     while (getline(file, oneline))
     {
         lineNumber++;
 
         if (lineNumber == 1)
             continue; // first line is headings
+
+        if (oneline.empty())
+            continue;
 
         stringstream ss(oneline); // convert the line into stringstream, sparsing works on this
         string date, open, high, low, close, volume;
@@ -51,16 +79,46 @@ bool Stock::loadFromCSV(string filename)
         getline(ss, volume, ',');
 
         // trim extra
-        dates.push_back(trimf(date));
-        openPrices.push_back(stod(trimf(open))); // stod: string to double
-        highPrices.push_back(stod(trimf(high)));
-        lowPrices.push_back(stod(trimf(low)));
-        closePrices.push_back(stod(trimf(close)));
-        // volumes.push_back(stoll(trimf(volume)));
-        volumes.push_back((long long)stod(trimf(volume)));
+        string dateTrimmed = trimf(date);
+        string openTrimmed = trimf(open);
+        string highTrimmed = trimf(high);
+        string lowTrimmed = trimf(low);
+        string closeTrimmed = trimf(close);
+        string volumeTrimmed = trimf(volume);
+
+        double openValue = 0.0;
+        double highValue = 0.0;
+        double lowValue = 0.0;
+        double closeValue = 0.0;
+        double volumeValue = 0.0;
+
+        if (dateTrimmed.empty() ||
+            !tryParseDouble(openTrimmed, openValue) ||
+            !tryParseDouble(highTrimmed, highValue) ||
+            !tryParseDouble(lowTrimmed, lowValue) ||
+            !tryParseDouble(closeTrimmed, closeValue) ||
+            !tryParseDouble(volumeTrimmed, volumeValue))
+        {
+            cout << "Skipping malformed CSV row in " << filename << " at line " << lineNumber << endl;
+            continue;
+        }
+
+        dates.push_back(dateTrimmed);
+        openPrices.push_back(openValue);
+        highPrices.push_back(highValue);
+        lowPrices.push_back(lowValue);
+        closePrices.push_back(closeValue);
+        volumes.push_back((long long)volumeValue);
+        parsedRows++;
     }
 
     file.close();
+
+    if (parsedRows == 0)
+    {
+        cout << "No valid data rows found in " << filename << endl;
+        return false;
+    }
 
     // now calculating indicators and storing them in the vectors (defined in the header file)
     calculateAllIndicators();

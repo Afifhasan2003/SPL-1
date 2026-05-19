@@ -35,4 +35,4 @@ g++ -std=c++17 main.cpp src/Stock.cpp src/Portfolio.cpp src/Analytics.cpp src/Me
 OR
 
 g++ -std=c++17 -o quantlab main.cpp src/*.cpp -lcurl
-./quantlab4
+./quantlab
